@@ -17,10 +17,10 @@ Including another URLconf
 
 # backend/urls.py
 
-
 from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path('auth/', include('backend.authentication.urls')),
+    path('admin/', admin.site.urls),  # Ruta del panel de administración
+    path('auth/', include('backend.authentication.urls')),  # Incluye las rutas de autenticación
 ]
