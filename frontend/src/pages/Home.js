@@ -5,11 +5,12 @@ const Home = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Verificar si los tokens están en el localStorage
         const accessToken = localStorage.getItem('access');
-        
-        // Verificar si el token existe
-        if (!accessToken) {
-            // Si no hay token, redirigir al login
+        const refreshToken = localStorage.getItem('refresh');
+
+        if (!accessToken || !refreshToken) {
+            // Si no hay tokens, redirigir al login
             navigate('/login');
         }
     }, [navigate]);
@@ -17,7 +18,17 @@ const Home = () => {
     return (
         <div>
             <h1>Welcome to the Home Page!</h1>
-            <p>This page is only accessible if you are logged in.</p>
+            <p>You are successfully logged in.</p>
+            <button
+                onClick={() => {
+                    // Limpiar los tokens del localStorage y redirigir al login
+                    localStorage.removeItem('access');
+                    localStorage.removeItem('refresh');
+                    navigate('/login');
+                }}
+            >
+                Logout
+            </button>
         </div>
     );
 };
