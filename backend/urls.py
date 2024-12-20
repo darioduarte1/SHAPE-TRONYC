@@ -19,8 +19,13 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),  # Ruta del panel de administración
-    path('auth/', include('backend.authentication.urls')),  # Incluye las rutas de autenticación
+    path('admin/', admin.site.urls),  # Ruta del admin
+    path('auth/register/', include('backend.authentication.urls')),  # Ruta de registro
+    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Login para obtener tokens
+    path('auth/', include('backend.authentication.urls')),  # Rutas de autenticación
+    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Refrescar tokens
+    path('auth/logout/', include('backend.authentication.urls')),  # Logout y blacklist
 ]
