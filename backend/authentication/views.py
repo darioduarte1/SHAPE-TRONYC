@@ -1,6 +1,6 @@
 # backend/authentication/views.py
 
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +10,8 @@ from .forms import UserRegistrationForm
 
 # Vista para registrar usuarios
 class RegisterView(APIView):
+    permission_classes = [AllowAny]  # Permitir acceso sin autenticación
+
     def post(self, request):
         form = UserRegistrationForm(data=request.data)
         if form.is_valid():
