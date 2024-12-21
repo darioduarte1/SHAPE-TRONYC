@@ -24,29 +24,29 @@ const LoginRegister = () => {
         setIsPartner(!isPartner);
     };
 
-    const login = async (email, password) => {
+    const login = async (username, password) => {
         try {
             const response = await fetch("http://localhost:8000/auth/login/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ username: email, password }),
+                body: JSON.stringify({ username, password }), // Enviando 'username' en lugar de 'email'
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem("access", data.access);
                 localStorage.setItem("refresh", data.refresh);
-                toast.success("Inicio de sesión exitoso. ¡Bienvenido!");
+                toast.success("Inicio de sesión exitoso.");
                 navigate("/home");
             } else {
                 const errorData = await response.json();
-                toast.error("Error al iniciar sesión: " + errorData.error || "Credenciales incorrectas.");
+                toast.error("Error al iniciar sesión: " + (errorData.error || "Credenciales inválidas."));
             }
         } catch (err) {
             console.error("Error al iniciar sesión", err);
-            toast.error("Error al iniciar sesión. Por favor, intenta nuevamente.");
+            toast.error("Error al iniciar sesión. Por favor intenta nuevamente.");
         }
     };
 
@@ -136,10 +136,10 @@ const LoginRegister = () => {
                         <h1>Iniciar Sesión</h1>
                         <span>Usa tu correo y contraseña</span>
                         <input
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            type="text"
+                            placeholder="Username" // Cambiado a Username
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)} // Cambiado a setUsername
                         />
                         <input
                             type="password"
@@ -148,7 +148,7 @@ const LoginRegister = () => {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                         <button onClick={() => toast.info("Función no implementada.")}>¿Olvidaste tu contraseña?</button>
-                        <button onClick={() => login(email, password)}>Iniciar Sesión</button>
+                        <button onClick={() => login(username, password)}>Iniciar Sesión</button>
                     </div>
                 </div>
                 <div className="signup-toggle-container">
