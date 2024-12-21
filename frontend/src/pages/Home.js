@@ -24,7 +24,7 @@ const Home = () => {
                     // Limpiar los tokens del localStorage y redirigir al login
                     localStorage.removeItem('access');
                     localStorage.removeItem('refresh');
-                    navigate('/login');
+                    navigate('/logout');
                 }}
             >
                 Logout
