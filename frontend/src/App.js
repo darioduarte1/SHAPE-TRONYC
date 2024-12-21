@@ -9,7 +9,7 @@ import Home from "./pages/Home";
 function App() {
     return (
         <>
-            <Router>
+            <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <Routes>
                     {/* Redirección de la ruta raíz */}
                     <Route path="/" element={<Navigate to="/auth" replace />} />
@@ -39,4 +39,3 @@ function App() {
 }
 
 export default App;
-
