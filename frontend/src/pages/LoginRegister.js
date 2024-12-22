@@ -86,7 +86,7 @@ const LoginRegister = () => {
             >
                 <div className="signup-form-container signup-sign-up">
                     <div className="form">
-                        <h1>Crear Cuenta</h1>
+                        <h1>Create Account</h1>
                         <input
                             type="text"
                             placeholder="Username"
@@ -126,15 +126,15 @@ const LoginRegister = () => {
                                 <span className="slider round"></span>
                             </label>
                             <span className="toggle-text">
-                                {isPartner ? "Socio" : "Usuario"}
+                                {isPartner ? "Staff" : "User"}
                             </span>
                         </div>
                     </div>
                 </div>
                 <div className="signup-form-container signup-sign-in">
                     <div className="form">
-                        <h1>Iniciar Sesión</h1>
-                        <span>Usa tu correo y contraseña</span>
+                        <h1>Log in</h1>
+                        <span>Use your email and password</span>
                         <input
                             type="text"
                             placeholder="Username" // Cambiado a Username
@@ -147,26 +147,26 @@ const LoginRegister = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
-                        <button onClick={() => toast.info("Función no implementada.")}>¿Olvidaste tu contraseña?</button>
-                        <button onClick={() => login(username, password)}>Iniciar Sesión</button>
+                        <button onClick={() => toast.info("Función no implementada.")}>Forgot your password?</button>
+                        <button onClick={() => login(username, password)}>Log in</button>
                     </div>
                 </div>
                 <div className="signup-toggle-container">
                     <div className="signup-toggle">
                         <div className="signup-toggle-panel signup-toggle-left">
-                            <h1>¡Bienvenido de nuevo!</h1>
-                            <p>Introduce tus datos para iniciar sesión</p>
+                            <h1>Welcome back!</h1>
+                            <p>Please enter your details to log in</p>
                             <button
                                 className="signup-hidden"
                                 id="login"
                                 onClick={handleLoginClick}
                             >
-                                Iniciar Sesión
+                                Log in
                             </button>
                         </div>
                         <div className="signup-toggle-panel signup-toggle-right">
-                            <h1>¡Hola, amigo!</h1>
-                            <p>Regístrate con tus datos personales</p>
+                            <h1>Hi, friend!</h1>
+                            <p>Register with your personal data</p>
                             <button
                                 className="signup-hidden"
                                 id="register"
