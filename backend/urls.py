@@ -7,7 +7,8 @@ from django.http import JsonResponse
 
 # Vista para la raíz (punto de verificación de Render)
 def root_view(request):
-    return JsonResponse({"message": "Welcome to Shape-Tronyc API"}, status=200)
+    headers = dict(request.headers)
+    return JsonResponse({"message": "Welcome to Shape-Tronyc API", "headers": headers}, status=200)
 
 urlpatterns = [
     path('', root_view, name='root'),  # Ruta para la raíz
