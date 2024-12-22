@@ -1,41 +1,25 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Logout = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const performLogout = async () => {
-            try {
-                // Obtén el refresh token del localStorage
-                const refreshToken = localStorage.getItem('refresh');
+        const performLogout = () => {
+            // Limpia los tokens del localStorage
+            localStorage.removeItem("access");
+            localStorage.removeItem("refresh");
 
-                if (refreshToken) {
-                    // Enviar el refresh token al backend para invalidarlo
-                    await axios.post('http://localhost:8000/auth/logout/', {
-                        refresh: refreshToken,
-                    });
-                }
-
-                // Eliminar los tokens del localStorage
-                localStorage.removeItem('access');
-                localStorage.removeItem('refresh');
-
-                // Redirigir al login
-                navigate('/login');
-            } catch (error) {
-                // En caso de error, asegurarse de limpiar los tokens y redirigir
-                localStorage.removeItem('access');
-                localStorage.removeItem('refresh');
-                navigate('/login');
-            }
+            // Muestra un solo toast y redirige
+            toast.success("Logout realizado con éxito", { toastId: "logout-success" });
+            navigate("/auth", { replace: true });
         };
 
         performLogout();
     }, [navigate]);
 
-    return <h1>Logging out...</h1>;
+    return <h1>Realizando logout...</h1>;
 };
 
 export default Logout;
