@@ -36,12 +36,15 @@ const LoginRegister = () => {
     
             if (response.ok) {
                 const data = await response.json();
+                console.log("Tokens recibidos:", data); // Verifica que los tokens se reciben correctamente
                 localStorage.setItem("access", data.access);
                 localStorage.setItem("refresh", data.refresh);
+                console.log("Tokens guardados en localStorage");
                 toast.success("Inicio de sesión exitoso.");
                 navigate("/home");
             } else {
                 const errorData = await response.json();
+                console.log("Error al iniciar sesión:", errorData); // Depuración del error
                 toast.error("Error al iniciar sesión: " + (errorData.error || "Credenciales inválidas."));
             }
         } catch (err) {
