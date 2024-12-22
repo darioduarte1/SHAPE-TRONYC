@@ -21,6 +21,8 @@ class RegisterView(APIView):
 
 # Vista para login
 class LoginView(APIView):
+    permission_classes = [AllowAny]  # Permite el acceso a cualquiera
+
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
