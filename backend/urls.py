@@ -11,9 +11,9 @@ def root_view(request):
     return JsonResponse({"message": "Welcome to Shape-Tronyc API", "headers": headers}, status=200)
 
 urlpatterns = [
-    path('', root_view, name='root'),  # Ruta para la raíz
-    path('admin/', admin.site.urls),  # Ruta del admin
-    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Login para obtener tokens
-    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Refrescar tokens
-    path('auth/', include('backend.authentication.urls')),  # Rutas de autenticación (register, logout, etc.)
+    path('', lambda request: JsonResponse({"message": "Backend is running"})),
+    path('admin/', admin.site.urls),
+    path('auth/', include('backend.authentication.urls')),
+    path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
