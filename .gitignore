@@ -1,3 +1,4 @@
 # Excluir archivos de caché de Python
 *.pyc
 __pycache__/
+.env
