@@ -8,8 +8,11 @@ import Home from "./pages/Home";
 import Home2 from "./components/Home2"; // Importando Home2
 
 function App() {
+    // Determinamos el basename dinámicamente
+    const basename = process.env.NODE_ENV === "production" ? "/SHAPE-TRONYC" : "";
+
     return (
-        <Router>
+        <Router basename={basename}>
             <Routes>
                 {/* Redirección de la raíz a la página de autenticación */}
                 <Route path="/" element={<Navigate to="/auth" replace />} />
