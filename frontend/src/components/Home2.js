@@ -20,12 +20,13 @@ const Home2 = () => {
           personalized training and diet plans tailored for you.
         </p>
         <div className="mt-10 max-w-xs">
-          <a
-            href="#"
+          {/* Cambiamos <a> por un botón */}
+          <button
             className="flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+            onClick={() => alert("Joining Now!")}
           >
             Join Now
-          </a>
+          </button>
         </div>
       </div>
     </div>
