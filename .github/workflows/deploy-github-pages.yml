@@ -3,34 +3,33 @@ name: Deploy GitHub Pages
 on:
   push:
     branches:
-      - develop
+      - develop # Cambia al nombre de tu rama principal si no es develop
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-22.04 # Usamos una versión específica para evitar advertencias futuras
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18 # Usa la versión compatible con tu proyecto
 
-      - name: Install dependencies
-        run: |
-          cd frontend
-          npm install
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm install
 
-      - name: Build project
-        run: |
-          cd frontend
-          npm run build
+    - name: Build project
+      run: |
+        cd frontend
+        npm run build
 
-      - name: Deploy to GitHub Pages
-        run: |
-          cd frontend
-          npm run deploy
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: frontend/build
