@@ -11,8 +11,14 @@ function App() {
     // Determinamos el basename dinámicamente
     const basename = process.env.NODE_ENV === "production" ? "/SHAPE-TRONYC" : "";
 
+    // Configuración de flags futuras de React Router
+    const routerFutureConfig = {
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+    };
+
     return (
-        <Router basename={basename}>
+        <Router basename={basename} future={routerFutureConfig}>
             <Routes>
                 {/* Redirección de la raíz a la página de autenticación */}
                 <Route path="/" element={<Navigate to="/auth" replace />} />
