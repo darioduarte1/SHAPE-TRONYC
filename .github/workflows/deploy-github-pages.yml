@@ -6,30 +6,37 @@ on:
       - develop
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Setup Node.js environment
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18 # Cambiado a una versión recomendada (actualizable según necesidad)
 
+      # Install dependencies
       - name: Install dependencies
         run: |
           cd frontend
-          npm install
+          npm ci # Más seguro que npm install para CI/CD
 
+      # Build the project
       - name: Build project
         run: |
           cd frontend
           npm run build
 
+      # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: frontend/build
+          publish_branch: gh-pages # Especifica la rama de publicación (por si acaso)
+          cname: darioduarte1.github.io # (opcional) si usas un dominio personalizado
