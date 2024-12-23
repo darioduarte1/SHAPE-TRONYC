@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/SHAPE-TRONYC/static/css/main.e78f48d6.css",
+    "main.js": "/SHAPE-TRONYC/static/js/main.52450edc.js",
+    "index.html": "/SHAPE-TRONYC/index.html",
+    "main.e78f48d6.css.map": "/SHAPE-TRONYC/static/css/main.e78f48d6.css.map",
+    "main.52450edc.js.map": "/SHAPE-TRONYC/static/js/main.52450edc.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e78f48d6.css",
+    "static/js/main.52450edc.js"
+  ]
+}
