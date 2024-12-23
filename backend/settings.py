@@ -43,14 +43,12 @@ MIDDLEWARE = [
 
 # Cross-Origin Resource Sharing
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default="").split(',')
-CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 
 ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'frontend/build'],  # Ajusta si tienes frontend separado
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,7 +96,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'frontend/build/static']  # Ajustar si no tienes frontend
+STATICFILES_DIRS = []  # Vacío si no estás sirviendo archivos estáticos personalizados.
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # WhiteNoise settings
@@ -124,7 +122,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
