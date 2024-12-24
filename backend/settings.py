@@ -33,7 +33,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # Mover arriba para priorizar CORS
+    'corsheaders.middleware.CorsMiddleware',  # Prioritize CORS Middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -41,8 +41,32 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Cross-Origin Resource Sharing
+# Cross-Origin Resource Sharing (CORS)
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default="").split(',')
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default="").split(',')
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+CORS_ALLOW_CREDENTIALS = True  # Enable if credentials are required
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -67,7 +91,6 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(default=config('DATABASE_URL'), conn_max_age=600)
 }
-
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -96,7 +119,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = []  # Vacío si no estás sirviendo archivos estáticos personalizados.
+STATICFILES_DIRS = []  # Empty if no custom static files
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # WhiteNoise settings
@@ -111,7 +134,7 @@ X_FRAME_OPTIONS = 'DENY'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Django REST Framework y JWT
+# Django REST Framework and JWT
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
