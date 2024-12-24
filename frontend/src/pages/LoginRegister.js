@@ -3,11 +3,8 @@ import "../styles/LoginRegister.css";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-// Determina la URL base dependiendo del entorno
-const API_BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://shape-tronyc-backend.onrender.com" // Backend en producción
-    : "http://localhost:8000"; // Backend local
+// Determina la URL base desde las variables de entorno
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 const LoginRegister = () => {
   const [isActive, setIsActive] = useState(false); // Controla si estás en registro o login
@@ -42,15 +39,12 @@ const LoginRegister = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Tokens recibidos:", data); // Verifica que los tokens se reciben correctamente
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
-        console.log("Tokens guardados en localStorage");
         toast.success("Inicio de sesión exitoso.");
         navigate("/home");
       } else {
         const errorData = await response.json();
-        console.log("Error al iniciar sesión:", errorData); // Depuración del error
         toast.error(
           "Error al iniciar sesión: " +
             (errorData.error || "Credenciales inválidas.")
@@ -85,7 +79,7 @@ const LoginRegister = () => {
 
       if (response.ok) {
         toast.success("Registro exitoso. Ahora puedes iniciar sesión.");
-        setIsActive(false); // Cambiar a la vista de login
+        setIsActive(false);
       } else {
         const errorData = await response.json();
         toast.error("Error al registrarse: " + JSON.stringify(errorData));
