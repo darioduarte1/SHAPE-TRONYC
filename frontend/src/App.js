@@ -1,5 +1,5 @@
 import React from "react";
-import { HashRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LoginRegister from "./pages/LoginRegister";
@@ -8,10 +8,13 @@ import Home from "./pages/Home";
 import Home2 from "./components/Home2";
 
 function App() {
-    const basename = process.env.NODE_ENV === "production" ? "/SHAPE-TRONYC" : "/";
+    const futureFlags = {
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+    };
 
     return (
-        <Router basename={basename}>
+        <Router future={futureFlags}>
             <Routes>
                 <Route path="/" element={<Navigate to="/auth" replace />} />
                 <Route path="/auth" element={<LoginRegister />} />
