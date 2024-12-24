@@ -4,6 +4,7 @@
     {
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
+      "ignoreCommand": "echo 'IGNORE CACHE'",
       "config": {
         "distDir": "build"
       }
