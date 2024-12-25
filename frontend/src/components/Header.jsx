@@ -4,56 +4,28 @@ import { Offcanvas } from "bootstrap";
 
 const Header = () => {
     const leftOffcanvasRef = useRef(null);
-    const rightOffcanvasRef = useRef(null);
     const leftButtonRef = useRef(null);
-    const rightButtonRef = useRef(null);
 
     let leftOffcanvasInstance = null;
-    let rightOffcanvasInstance = null;
 
-    const handleOpenOffcanvas = (side) => {
-        const offcanvasElement =
-            side === "left" ? leftOffcanvasRef.current : rightOffcanvasRef.current;
-        const buttonElement =
-            side === "left" ? leftButtonRef.current : rightButtonRef.current;
+    const handleOpenOffcanvas = () => {
+        const offcanvasElement = leftOffcanvasRef.current;
+        const buttonElement = leftButtonRef.current;
 
         if (offcanvasElement) {
             const offcanvasInstance = Offcanvas.getOrCreateInstance(offcanvasElement);
 
-            if (side === "left") {
-                leftOffcanvasInstance = offcanvasInstance;
-            } else {
-                rightOffcanvasInstance = offcanvasInstance;
-            }
+            leftOffcanvasInstance = offcanvasInstance;
 
             offcanvasInstance.show();
             buttonElement.blur();
         }
     };
 
-    const handleCloseOffcanvas = (side) => {
-        const offcanvasInstance =
-            side === "left" ? leftOffcanvasInstance : rightOffcanvasInstance;
-        const buttonElement =
-            side === "left" ? leftButtonRef.current : rightButtonRef.current;
-
-        if (offcanvasInstance) {
-            offcanvasInstance.hide();
-        }
-
-        if (buttonElement) {
-            buttonElement.blur();
-        }
-    };
-
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (
-                event.target.closest(".offcanvas-start") ||
-                event.target.closest(".offcanvas-end")
-            ) {
+            if (event.target.closest(".offcanvas-start")) {
                 if (leftOffcanvasInstance) leftOffcanvasInstance.hide();
-                if (rightOffcanvasInstance) rightOffcanvasInstance.hide();
             }
         };
 
@@ -65,10 +37,6 @@ const Header = () => {
             if (leftOffcanvasInstance) {
                 leftOffcanvasInstance.dispose();
                 leftOffcanvasInstance = null;
-            }
-            if (rightOffcanvasInstance) {
-                rightOffcanvasInstance.dispose();
-                rightOffcanvasInstance = null;
             }
         };
     }, []);
@@ -83,23 +51,45 @@ const Header = () => {
                         className="navbar-toggler"
                         type="button"
                         aria-controls="leftOffcanvas"
-                        onClick={() => handleOpenOffcanvas("left")}
+                        onClick={handleOpenOffcanvas}
                     >
                         <span className="navbar-toggler-icon"></span>
                     </button>
                     <a className="navbar-brand" href="#">
                         Mi App
                     </a>
-                    {/* Botón para abrir el offcanvas derecho */}
-                    <button
-                        ref={rightButtonRef}
-                        className="btn btn-secondary"
-                        type="button"
-                        aria-controls="rightOffcanvas"
-                        onClick={() => handleOpenOffcanvas("right")}
-                    >
-                        <i className="bi bi-gear-fill"></i>
-                    </button>
+                    {/* Dropdown en el lado derecho */}
+                    <div className="dropdown">
+                        <button
+                            className="btn btn-secondary"
+                            type="button"
+                            id="settingsDropdown"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            <i className="bi bi-gear-fill"></i>
+                        </button>
+                        <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
+                            <li>
+                                <a className="dropdown-item" href="#">
+                                    Perfil
+                                </a>
+                            </li>
+                            <li>
+                                <a className="dropdown-item" href="#">
+                                    Configuración
+                                </a>
+                            </li>
+                            <li>
+                                <hr className="dropdown-divider" />
+                            </li>
+                            <li>
+                                <a className="dropdown-item" href="#">
+                                    Cerrar sesión
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </nav>
 
@@ -118,24 +108,6 @@ const Header = () => {
                 </div>
                 <div className="offcanvas-body">
                     <p>Contenido del menú desplegable izquierdo.</p>
-                </div>
-            </div>
-
-            {/* Offcanvas derecho */}
-            <div
-                ref={rightOffcanvasRef}
-                className="offcanvas offcanvas-end"
-                tabIndex="-1"
-                id="rightOffcanvas"
-                aria-labelledby="rightOffcanvasLabel"
-            >
-                <div className="offcanvas-header">
-                    <h5 className="offcanvas-title" id="rightOffcanvasLabel">
-                        Configuración
-                    </h5>
-                </div>
-                <div className="offcanvas-body">
-                    <p>Área de configuración del usuario.</p>
                 </div>
             </div>
         </header>
