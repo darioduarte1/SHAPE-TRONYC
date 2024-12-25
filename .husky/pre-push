@@ -1,5 +1,2 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 cd frontend
 npx eslint "src/**/*.{js,jsx}" || exit 1
