@@ -33,3 +33,4 @@ frontend/.env
 .idea/
 .vscode/
 *.swp
+.vercel
