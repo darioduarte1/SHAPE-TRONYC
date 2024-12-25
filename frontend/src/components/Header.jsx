@@ -7,7 +7,7 @@ const Header = () => {
     const navigate = useNavigate();
     const leftOffcanvasRef = useRef(null);
     const leftButtonRef = useRef(null);
-    const leftOffcanvasInstance = useRef(null);
+    const leftOffcanvasInstanceRef = useRef(null);
 
     const handleOpenOffcanvas = () => {
         const offcanvasElement = leftOffcanvasRef.current;
@@ -15,7 +15,7 @@ const Header = () => {
 
         if (offcanvasElement) {
             const offcanvasInstance = Offcanvas.getOrCreateInstance(offcanvasElement);
-            leftOffcanvasInstance.current = offcanvasInstance;
+            leftOffcanvasInstanceRef.current = offcanvasInstance;
             offcanvasInstance.show();
             buttonElement.blur();
         }
@@ -24,7 +24,8 @@ const Header = () => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (event.target.closest(".offcanvas-start")) {
-                if (leftOffcanvasInstance.current) leftOffcanvasInstance.current.hide();
+                const offcanvasInstance = leftOffcanvasInstanceRef.current;
+                if (offcanvasInstance) offcanvasInstance.hide();
             }
         };
 
@@ -32,10 +33,10 @@ const Header = () => {
 
         return () => {
             document.removeEventListener("click", handleClickOutside);
-
-            if (leftOffcanvasInstance.current) {
-                leftOffcanvasInstance.current.dispose();
-                leftOffcanvasInstance.current = null;
+            const offcanvasInstance = leftOffcanvasInstanceRef.current;
+            if (offcanvasInstance) {
+                offcanvasInstance.dispose();
+                leftOffcanvasInstanceRef.current = null;
             }
         };
     }, []);
@@ -68,14 +69,20 @@ const Header = () => {
                         </button>
                         <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
                             <li>
-                                <a className="dropdown-item" href="#">
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => navigate("/profile")}
+                                >
                                     Perfil
-                                </a>
+                                </button>
                             </li>
                             <li>
-                                <a className="dropdown-item" href="#">
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => navigate("/settings")}
+                                >
                                     Configuración
-                                </a>
+                                </button>
                             </li>
                             <li>
                                 <hr className="dropdown-divider" />
@@ -83,9 +90,7 @@ const Header = () => {
                             <li>
                                 <button
                                     className="btn btn-danger w-100"
-                                    onClick={() => {
-                                        navigate("/logout");
-                                    }}
+                                    onClick={() => navigate("/logout")}
                                 >
                                     Logout
                                 </button>
