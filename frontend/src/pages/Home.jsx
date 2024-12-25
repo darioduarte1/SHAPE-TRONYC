@@ -31,16 +31,6 @@ const Home = () => {
       <div className="container mt-5 pt-5">
         <h1>Welcome to the Home Page!</h1>
         <p>You are successfully logged in.</p>
-        <button
-          className="btn btn-danger"
-          onClick={() => {
-            localStorage.removeItem('access');
-            localStorage.removeItem('refresh');
-            navigate('/logout');
-          }}
-        >
-          Logout
-        </button>
       </div>
     </div>
   );
