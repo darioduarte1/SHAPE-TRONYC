@@ -108,6 +108,7 @@ const LoginRegister = () => {
               placeholder="Username"
               value={formData.username}
               onChange={handleInputChange}
+              autoComplete="username" // Añadido el atributo autocomplete
             />
             <label htmlFor="email" className="sr-only">Email</label>
             <input
@@ -117,6 +118,7 @@ const LoginRegister = () => {
               placeholder="Email"
               value={formData.email}
               onChange={handleInputChange}
+              autoComplete="email" // Añadido el atributo autocomplete
             />
             <label htmlFor="password" className="sr-only">Password</label>
             <input
@@ -126,6 +128,7 @@ const LoginRegister = () => {
               placeholder="Password"
               value={formData.password}
               onChange={handleInputChange}
+              autoComplete="new-password" // Añadido el atributo autocomplete
             />
             <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
             <input
@@ -135,6 +138,7 @@ const LoginRegister = () => {
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleInputChange}
+              autoComplete="new-password" // Añadido el atributo autocomplete
             />
             <div className="signup-toggle-wrapper">
               <button onClick={signup}>Sign Up</button>
