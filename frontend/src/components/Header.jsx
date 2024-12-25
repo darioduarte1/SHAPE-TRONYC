@@ -1,14 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Offcanvas } from "bootstrap";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
     const navigate = useNavigate();
     const leftOffcanvasRef = useRef(null);
     const leftButtonRef = useRef(null);
-
-    let leftOffcanvasInstance = null;
+    const leftOffcanvasInstance = useRef(null);
 
     const handleOpenOffcanvas = () => {
         const offcanvasElement = leftOffcanvasRef.current;
@@ -16,9 +15,7 @@ const Header = () => {
 
         if (offcanvasElement) {
             const offcanvasInstance = Offcanvas.getOrCreateInstance(offcanvasElement);
-
-            leftOffcanvasInstance = offcanvasInstance;
-
+            leftOffcanvasInstance.current = offcanvasInstance;
             offcanvasInstance.show();
             buttonElement.blur();
         }
@@ -27,7 +24,7 @@ const Header = () => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (event.target.closest(".offcanvas-start")) {
-                if (leftOffcanvasInstance) leftOffcanvasInstance.hide();
+                if (leftOffcanvasInstance.current) leftOffcanvasInstance.current.hide();
             }
         };
 
@@ -36,9 +33,9 @@ const Header = () => {
         return () => {
             document.removeEventListener("click", handleClickOutside);
 
-            if (leftOffcanvasInstance) {
-                leftOffcanvasInstance.dispose();
-                leftOffcanvasInstance = null;
+            if (leftOffcanvasInstance.current) {
+                leftOffcanvasInstance.current.dispose();
+                leftOffcanvasInstance.current = null;
             }
         };
     }, []);
@@ -57,9 +54,7 @@ const Header = () => {
                     >
                         <span className="navbar-toggler-icon"></span>
                     </button>
-                    <a className="navbar-brand" href="#">
-                        Mi App
-                    </a>
+                    <span className="navbar-brand">Mi App</span>
                     {/* Dropdown en el lado derecho */}
                     <div className="dropdown">
                         <button
@@ -87,9 +82,9 @@ const Header = () => {
                             </li>
                             <li>
                                 <button
-                                    className="btn btn-danger btn-block w-100"
+                                    className="btn btn-danger w-100"
                                     onClick={() => {
-                                        navigate('/logout');
+                                        navigate("/logout");
                                     }}
                                 >
                                     Logout
