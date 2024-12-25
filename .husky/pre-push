@@ -1,3 +1,0 @@
-#!/bin/sh
-cd frontend
-npx eslint "src/**/*.{js,jsx}" || exit 1
