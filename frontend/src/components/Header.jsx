@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Offcanvas } from "bootstrap";
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
+    const navigate = useNavigate();
     const leftOffcanvasRef = useRef(null);
     const leftButtonRef = useRef(null);
 
@@ -84,9 +86,14 @@ const Header = () => {
                                 <hr className="dropdown-divider" />
                             </li>
                             <li>
-                                <a className="dropdown-item" href="#">
-                                    Cerrar sesión
-                                </a>
+                                <button
+                                    className="btn btn-danger btn-block w-100"
+                                    onClick={() => {
+                                        navigate('/logout');
+                                    }}
+                                >
+                                    Logout
+                                </button>
                             </li>
                         </ul>
                     </div>
