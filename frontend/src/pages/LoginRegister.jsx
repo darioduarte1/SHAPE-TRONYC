@@ -41,8 +41,7 @@ const LoginRegister = () => {
         const data = await response.json();
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
-        toast.success("Inicio de sesión exitoso.");
-        navigate("/home");
+        navigate("/home"); // Redirige directamente sin mostrar el toast
       } else {
         const errorData = await response.json();
         toast.error(
