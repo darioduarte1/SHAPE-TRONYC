@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import LoginRegister from "./pages/LoginRegister";
 import Logout from "./pages/Logout";
 import Home from "./pages/Home";
-import Home2 from "./components/Home2";
+
 
 function App() {
     const futureFlags = {
@@ -20,11 +20,10 @@ function App() {
                 <Route path="/auth" element={<LoginRegister />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/logout" element={<Logout />} />
-                <Route path="/home2" element={<Home2 />} />
             </Routes>
             <ToastContainer
-                position="top-right"
-                autoClose={5000}
+                position="bottom-left"
+                autoClose={3000}
                 hideProgressBar={false}
                 newestOnTop={false}
                 closeOnClick
@@ -32,7 +31,7 @@ function App() {
                 pauseOnFocusLoss
                 draggable
                 pauseOnHover
-                theme="light"
+                theme="colored"
             />
         </Router>
     );
