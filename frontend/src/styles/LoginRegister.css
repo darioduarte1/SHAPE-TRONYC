@@ -7,6 +7,24 @@
     font-family: 'Montserrat', sans-serif;
 }
 
+.centered-title {
+    text-align: center;
+    margin: 0 auto;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
 .signup-body {
     position: relative;
     background-color: rgba(0, 0, 0, 0.5);
