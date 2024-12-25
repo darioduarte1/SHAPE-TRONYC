@@ -1,23 +1,41 @@
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import pluginReact from "eslint-plugin-react";
+import pluginA11y from "eslint-plugin-jsx-a11y";
+import babelParser from "@babel/eslint-parser";
 
-/** @type {import('eslint').Linter.Config[]} */
+/** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
   {
     files: ["**/*.{js,mjs,cjs,jsx}"],
     languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
       globals: {
         ...globals.browser,
-        ...globals.node, // Agrega las variables globales de Node.js
+        ...globals.node,
+      },
+      parser: babelParser, // Importa directamente el parser
+      parserOptions: {
+        requireConfigFile: false,
+        babelOptions: {
+          presets: ["@babel/preset-react"], // Habilita JSX
+        },
       },
     },
     settings: {
       react: {
-        version: "detect", // Detecta automáticamente la versión de React
+        version: "detect",
       },
     },
+    plugins: {
+      react: pluginReact,
+      "jsx-a11y": pluginA11y,
+    },
+    rules: {
+      ...pluginReact.configs.recommended.rules,
+      ...pluginA11y.configs.recommended.rules,
+    },
   },
-  pluginJs.configs.recommended,
-  pluginReact.configs.flat.recommended,
+  pluginJs.configs.recommended, // Configuración básica de JavaScript
 ];

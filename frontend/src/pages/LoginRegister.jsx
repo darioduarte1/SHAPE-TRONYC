@@ -3,50 +3,52 @@ import "../styles/LoginRegister.css";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-// Determina la URL base desde las variables de entorno
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 const LoginRegister = () => {
-  const [isActive, setIsActive] = useState(false); // Controla si estás en registro o login
-  const [isPartner, setIsPartner] = useState(false); // Controla el toggle de "Partner"
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isActive, setIsActive] = useState(false);
+  const [isPartner, setIsPartner] = useState(false);
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const navigate = useNavigate();
 
-  const handleRegisterClick = () => {
-    setIsActive(true);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleLoginClick = () => {
-    setIsActive(false);
-  };
+  const handleRegisterClick = () => setIsActive(true);
 
-  const handleToggleChange = () => {
-    setIsPartner(!isPartner);
-  };
+  const handleLoginClick = () => setIsActive(false);
 
-  const login = async (username, password) => {
+  const handleToggleChange = () => setIsPartner(!isPartner);
+
+  const login = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
-        navigate("/home"); // Redirige directamente sin mostrar el toast
+        navigate("/home");
       } else {
         const errorData = await response.json();
         toast.error(
-          "Error al iniciar sesión: " +
-            (errorData.error || "Credenciales inválidas.")
+          `Error al iniciar sesión: ${errorData.error || "Credenciales inválidas."}`
         );
       }
     } catch (err) {
@@ -55,8 +57,8 @@ const LoginRegister = () => {
     }
   };
 
-  const signup = async (username, email, password, confirmPassword, isPartner) => {
-    if (password !== confirmPassword) {
+  const signup = async () => {
+    if (formData.password !== formData.confirmPassword) {
       toast.error("Las contraseñas no coinciden.");
       return;
     }
@@ -68,10 +70,10 @@ const LoginRegister = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username,
-          email,
-          password,
-          confirm_password: confirmPassword,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          confirm_password: formData.confirmPassword,
           is_partner: isPartner,
         }),
       });
@@ -81,7 +83,7 @@ const LoginRegister = () => {
         setIsActive(false);
       } else {
         const errorData = await response.json();
-        toast.error("Error al registrarse: " + JSON.stringify(errorData));
+        toast.error(`Error al registrarse: ${JSON.stringify(errorData)}`);
       }
     } catch (err) {
       console.error("Error al registrarse", err);
@@ -97,50 +99,60 @@ const LoginRegister = () => {
       >
         <div className="signup-form-container signup-sign-up">
           <div className="form">
-            <h1>Create Account</h1>
+            <h1 className="centered-title">Create Account</h1>
+            <label htmlFor="username" className="sr-only">Username</label>
             <input
               type="text"
+              id="username"
+              name="username"
               placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={formData.username}
+              onChange={handleInputChange}
             />
+            <label htmlFor="email" className="sr-only">Email</label>
             <input
               type="email"
+              id="email"
+              name="email"
               placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleInputChange}
             />
+            <label htmlFor="password" className="sr-only">Password</label>
             <input
               type="password"
+              id="password"
+              name="password"
               placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleInputChange}
             />
+            <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
             <input
               type="password"
+              id="confirmPassword"
+              name="confirmPassword"
               placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
             />
             <div className="signup-toggle-wrapper">
-              <button
-                onClick={() =>
-                  signup(username, email, password, confirmPassword, isPartner)
-                }
-              >
-                Sign Up
-              </button>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={isPartner}
-                  onChange={handleToggleChange}
-                />
-                <span className="slider round"></span>
-              </label>
-              <span className="toggle-text">
-                {isPartner ? "Staff" : "User"}
-              </span>
+              <button onClick={signup}>Sign Up</button>
+              <div className="toggle-container">
+                <label className="switch" htmlFor="partner-toggle">
+                  <input
+                    id="partner-toggle"
+                    type="checkbox"
+                    checked={isPartner}
+                    onChange={handleToggleChange}
+                    aria-labelledby="partner-label"
+                  />
+                  <span className="slider round"></span>
+                </label>
+                <span id="partner-label" className="toggle-text">
+                  {isPartner ? "Staff" : "User"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -148,22 +160,28 @@ const LoginRegister = () => {
           <div className="form">
             <h1>Log in</h1>
             <span>Use your email and password</span>
+            <label htmlFor="loginUsername" className="sr-only">Username</label>
             <input
               type="text"
+              id="loginUsername"
+              name="username"
               placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={formData.username}
+              onChange={handleInputChange}
             />
+            <label htmlFor="loginPassword" className="sr-only">Password</label>
             <input
               type="password"
+              id="loginPassword"
+              name="password"
               placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleInputChange}
             />
             <button onClick={() => toast.info("Función no implementada.")}>
               Forgot your password?
             </button>
-            <button onClick={() => login(username, password)}>Log in</button>
+            <button onClick={login}>Log in</button>
           </div>
         </div>
         <div className="signup-toggle-container">
