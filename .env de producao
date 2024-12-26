@@ -1,6 +1,0 @@
-DEBUG=false
-ALLOWED_HOSTS=shape-tronyc-backend.onrender.com,railway.app,shape-tronyc.vercel.app
-DATABASE_URL=postgresql://postgres:pJfKsOTptAfiyWTPLclWteUXjOZRNkxc@autorack.proxy.rlwy.net:58523/railway
-CORS_ALLOWED_ORIGINS=https://shape-tronyc.vercel.app,https://shape-tronyc-backend.onrender.com,https://railway.app
-CSRF_TRUSTED_ORIGINS=https://shape-tronyc.vercel.app,https://shape-tronyc-backend.onrender.com,https://railway.app
-SECURE_SSL_REDIRECT=true
