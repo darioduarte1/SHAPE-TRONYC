@@ -2,7 +2,7 @@
 .DS_Store
 Thumbs.db
 *.log
-.env de producao
+.env.producao
 certs/
 
 # Python (Backend)
@@ -13,7 +13,6 @@ __pycache__/
 venv/
 
 # Django Static and Media
-staticfiles/
 /staticfiles/
 /media/
 
