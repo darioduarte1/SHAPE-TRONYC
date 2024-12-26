@@ -12,10 +12,12 @@ SECRET_KEY = config('SECRET_KEY')
 # Debug
 DEBUG = False
 
-if DEBUG is False:
-    STATIC_URL = '/static/'
-    STATICFILES_DIRS = [BASE_DIR / 'static']
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = '/static/'
+
+if DEBUG:
+    STATICFILES_DIRS = [BASE_DIR / 'static']  # Para archivos estáticos en desarrollo
+else:
+    STATIC_ROOT = BASE_DIR / 'staticfiles'  # Para `collectstatic` en producción
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -34,6 +36,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'django_extensions',
+    'backend.profiles',
 ]
 
 MIDDLEWARE = [
