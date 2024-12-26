@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -8,15 +8,48 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     age: "",
-    gender: "",
+    gender: "M", // Valor inicial
     profilePhoto: null,
     email: "",
     contactPhone: "",
   });
 
+  // Cargar los datos del perfil del usuario al cargar el componente
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/profiles/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access")}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setFormData({
+            fullName: data.full_name || "",
+            age: data.age || "",
+            gender: data.gender || "M",
+            profilePhoto: null, // No cargamos archivos aquí
+            email: data.email || "",
+            contactPhone: data.contact_number || "",
+          });
+        } else {
+          toast.error("No se pudieron cargar los datos del perfil.");
+        }
+      } catch (err) {
+        console.error("Error al cargar el perfil:", err);
+        toast.error("Error al cargar el perfil. Intenta nuevamente.");
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [name]: value || "" });
   };
 
   const handleFileChange = (e) => {
@@ -25,35 +58,33 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const data = new FormData();
     data.append("full_name", formData.fullName);
     data.append("age", formData.age);
     data.append("gender", formData.gender);
-    data.append("profile_photo", formData.profilePhoto);
-    data.append("email", formData.email);
-    data.append("contact_phone", formData.contactPhone);
-
+    data.append("profile_picture", formData.profilePhoto);
+    data.append("contact_number", formData.contactPhone);
+  
     try {
-      const response = await fetch(`${API_BASE_URL}/profile/update/`, {
-        method: "POST",
+      const response = await fetch(`${API_BASE_URL}/api/profiles/${localStorage.getItem("user_id")}/`, {
+        method: "PUT",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access")}`,
         },
         body: data,
       });
-
+  
       if (response.ok) {
         toast.success("Perfil actualizado con éxito.");
       } else {
         const errorData = await response.json();
         toast.error(
-          `Error al actualizar el perfil: ${errorData.error || "Intenta nuevamente."}`
+          `Error al actualizar el perfil: ${errorData.error || "Revisa los datos ingresados."}`
         );
       }
     } catch (err) {
-      console.error("Error al actualizar el perfil", err);
-      toast.error("Error al actualizar el perfil. Por favor, intenta nuevamente.");
+      toast.error("Error al actualizar el perfil. Intenta nuevamente.");
     }
   };
 
@@ -101,10 +132,9 @@ const Profile = () => {
             onChange={handleInputChange}
             required
           >
-            <option value="">Selecciona tu género</option>
-            <option value="male">Masculino</option>
-            <option value="female">Femenino</option>
-            <option value="other">Otro</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+            <option value="O">Otro</option>
           </select>
         </div>
         <div className="mb-3">
