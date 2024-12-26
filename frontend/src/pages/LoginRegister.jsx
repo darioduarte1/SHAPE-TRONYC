@@ -3,9 +3,12 @@ import "../styles/LoginRegister.css";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const LoginRegister = () => {
+
+  console.log("Backend API URL:", API_BASE_URL); // Agrega esta línea aquí
+  
   const [isActive, setIsActive] = useState(false);
   const [isPartner, setIsPartner] = useState(false);
   const [formData, setFormData] = useState({
