@@ -3,6 +3,7 @@
 Thumbs.db
 *.log
 .env de producao
+certs/
 
 # Python (Backend)
 *.pyc
