@@ -1,3 +1,8 @@
+"""
+Configuración de URLs para la app profiles.
+
+Este módulo define las rutas URL relacionadas con los perfiles de usuario.
+"""
 from django.urls import path
 from .views import ProfileView
 
