@@ -69,20 +69,9 @@ const Header = () => {
                         </button>
                         <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
                             <li>
-                                <button
-                                    className="dropdown-item"
-                                    onClick={() => navigate("/profile")}
-                                >
-                                    Perfil
-                                </button>
-                            </li>
-                            <li>
-                                <button
-                                    className="dropdown-item"
-                                    onClick={() => navigate("/settings")}
-                                >
-                                    Configuración
-                                </button>
+                                <a className="dropdown-item" href="/profile">
+                                    Profile
+                                </a>
                             </li>
                             <li>
                                 <hr className="dropdown-divider" />
