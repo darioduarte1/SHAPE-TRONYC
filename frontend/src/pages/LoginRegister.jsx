@@ -6,8 +6,6 @@ import { toast } from "react-toastify";
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const LoginRegister = () => {
-  console.log("Backend API URL:", API_BASE_URL); // Verificar la URL base del backend
-
   const [isActive, setIsActive] = useState(false);
   const [isPartner, setIsPartner] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,9 +44,7 @@ const LoginRegister = () => {
         const data = await response.json();
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
-        localStorage.setItem("user_id", data.user_id); // Guardar el user_id
         navigate("/home");
-        toast.success("Inicio de sesión exitoso.");
       } else {
         const errorData = await response.json();
         toast.error(
@@ -145,7 +141,6 @@ const LoginRegister = () => {
               autoComplete="new-password"
             />
             <div className="signup-toggle-wrapper">
-              <button onClick={signup}>Sign Up</button>
               <div className="toggle-container">
                 <label className="switch" htmlFor="partner-toggle">
                   <input
@@ -161,6 +156,7 @@ const LoginRegister = () => {
                   {isPartner ? "Staff" : "User"}
                 </span>
               </div>
+              <button onClick={signup}>Sign Up</button>
             </div>
           </div>
         </div>
@@ -186,10 +182,10 @@ const LoginRegister = () => {
               value={formData.password}
               onChange={handleInputChange}
             />
+            <button onClick={login}>Log in</button>
             <button onClick={() => toast.info("Función no implementada.")}>
               Forgot your password?
             </button>
-            <button onClick={login}>Log in</button>
           </div>
         </div>
         <div className="signup-toggle-container">
