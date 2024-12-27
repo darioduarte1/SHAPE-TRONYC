@@ -7,6 +7,7 @@ las instancias del modelo en representaciones JSON y viceversa para su uso en la
 
 from rest_framework import serializers
 from .models import UserProfile
+from django.contrib.auth.models import User
 
 class UserProfileSerializer(serializers.ModelSerializer):  # pylint: disable=too-few-public-methods
     """
@@ -19,6 +20,7 @@ class UserProfileSerializer(serializers.ModelSerializer):  # pylint: disable=too
         Meta (class): Define el modelo y los campos que se incluirán en la representación
         serializada.
     """
+    email = serializers.EmailField(source="user.email", read_only=True)
     class Meta:
         """
         Metaclase que configura el serializador.
@@ -28,4 +30,4 @@ class UserProfileSerializer(serializers.ModelSerializer):  # pylint: disable=too
             fields (list): Los campos del modelo que se incluirán en la serialización.
         """
         model = UserProfile
-        fields = ['user', 'full_name', 'age', 'gender', 'profile_picture', 'contact_number']
+        fields = ["id", "full_name", "age", "gender", "profile_picture", "contact_number", "email"]

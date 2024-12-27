@@ -6,9 +6,8 @@ import { toast } from "react-toastify";
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const LoginRegister = () => {
+  console.log("Backend API URL:", API_BASE_URL); // Verificar la URL base del backend
 
-  console.log("Backend API URL:", API_BASE_URL); // Agrega esta línea aquí
-  
   const [isActive, setIsActive] = useState(false);
   const [isPartner, setIsPartner] = useState(false);
   const [formData, setFormData] = useState({
@@ -47,7 +46,9 @@ const LoginRegister = () => {
         const data = await response.json();
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
+        localStorage.setItem("user_id", data.user_id); // Guardar el user_id
         navigate("/home");
+        toast.success("Inicio de sesión exitoso.");
       } else {
         const errorData = await response.json();
         toast.error(
@@ -111,7 +112,7 @@ const LoginRegister = () => {
               placeholder="Username"
               value={formData.username}
               onChange={handleInputChange}
-              autoComplete="username" // Añadido el atributo autocomplete
+              autoComplete="username"
             />
             <label htmlFor="email" className="sr-only">Email</label>
             <input
@@ -121,7 +122,7 @@ const LoginRegister = () => {
               placeholder="Email"
               value={formData.email}
               onChange={handleInputChange}
-              autoComplete="email" // Añadido el atributo autocomplete
+              autoComplete="email"
             />
             <label htmlFor="password" className="sr-only">Password</label>
             <input
@@ -131,7 +132,7 @@ const LoginRegister = () => {
               placeholder="Password"
               value={formData.password}
               onChange={handleInputChange}
-              autoComplete="new-password" // Añadido el atributo autocomplete
+              autoComplete="new-password"
             />
             <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
             <input
@@ -141,7 +142,7 @@ const LoginRegister = () => {
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleInputChange}
-              autoComplete="new-password" // Añadido el atributo autocomplete
+              autoComplete="new-password"
             />
             <div className="signup-toggle-wrapper">
               <button onClick={signup}>Sign Up</button>

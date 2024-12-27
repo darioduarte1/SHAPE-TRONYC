@@ -53,28 +53,28 @@ class UserProfile(models.Model):
 
 # Señales para crear y guardar automáticamente el perfil de usuario
 @receiver(post_save, sender=User)
-def create_user_profile(_sender, instance, created, **_kwargs):
+def create_user_profile(sender, instance, created, **kwargs):# pylint: disable=unused-argument
     """
     Crea automáticamente un perfil asociado al usuario al momento de su creación.
 
     Argumentos:
-        _sender (type): Modelo que envía la señal, en este caso User.
+        sender (type): Modelo que envía la señal, en este caso User.
         instance (User): Instancia del modelo User que disparó la señal.
         created (bool): Indica si el usuario fue creado.
-        **_kwargs: Argumentos adicionales que no se usan en esta función.
+        **kwargs: Argumentos adicionales que no se usan en esta función.
     """
     if created:
         UserProfile.objects.create(user=instance)  # pylint: disable=no-member
 
 
 @receiver(post_save, sender=User)
-def save_user_profile(_sender, instance, **_kwargs):
+def save_user_profile(sender, instance, **kwargs):# pylint: disable=unused-argument
     """
     Guarda automáticamente el perfil asociado al usuario.
 
     Argumentos:
-        _sender (type): Modelo que envía la señal, en este caso User.
+        sender (type): Modelo que envía la señal, en este caso User.
         instance (User): Instancia del modelo User que disparó la señal.
-        **_kwargs: Argumentos adicionales.
+        **kwargs: Argumentos adicionales.
     """
-    instance.userprofile.save()
+    instance.userprofile.save()# pylint: disable=no-member

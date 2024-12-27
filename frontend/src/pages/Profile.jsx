@@ -18,7 +18,8 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/profiles/`, {
+        const userId = localStorage.getItem("user_id"); // Obtén el ID del usuario
+        const response = await fetch(`${API_BASE_URL}/api/profiles/${userId}/`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -58,23 +59,24 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const data = new FormData();
     data.append("full_name", formData.fullName);
     data.append("age", formData.age);
     data.append("gender", formData.gender);
     data.append("profile_picture", formData.profilePhoto);
     data.append("contact_number", formData.contactPhone);
-  
+
     try {
-      const response = await fetch(`${API_BASE_URL}/api/profiles/${localStorage.getItem("user_id")}/`, {
+      const userId = localStorage.getItem("user_id"); // Obtén el ID del usuario
+      const response = await fetch(`${API_BASE_URL}/api/profiles/${userId}/`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access")}`,
         },
         body: data,
       });
-  
+
       if (response.ok) {
         toast.success("Perfil actualizado con éxito.");
       } else {
