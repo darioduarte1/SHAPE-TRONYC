@@ -1,6 +1,6 @@
 """
 Este módulo contiene las vistas basadas en clases para gestionar perfiles de usuario.
-Incluye operaciones para recuperar y actualizar perfiles de usuarios autenticados.
+Incluye operaciones para recuperar y actualizar perfiles de usuarios autenticados, incluyendo fotos de perfil.
 """
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -12,8 +12,8 @@ class ProfileView(APIView):
     """
     Vista de API para manejar perfiles de usuario por ID.
 
-    Esta vista permite a los usuarios autenticados recuperar y actualizar perfiles
-    utilizando un parámetro `user_id` en la URL.
+    Esta vista permite a los usuarios autenticados recuperar y actualizar perfiles,
+    incluyendo la posibilidad de actualizar su foto de perfil.
     """
     permission_classes = [IsAuthenticated]
 
@@ -47,8 +47,17 @@ class ProfileView(APIView):
             Response: Datos actualizados o un error 404 si el perfil no existe.
         """
         try:
-            profile = UserProfile.objects.get(user__id=user_id)
-            serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+            profile = UserProfile.objects.get(user__id=user_id)  # Verifica que el usuario existe
+
+            # Separar datos normales de archivos (por ejemplo, fotos)
+            profile_data = request.data.copy()
+            profile_file = request.FILES.get('profile_picture')  # La clave debe coincidir con el nombre en tu formulario
+
+            # Si se incluye un archivo, agrégalo a los datos a actualizar
+            if profile_file:
+                profile_data['profile_picture'] = profile_file
+
+            serializer = UserProfileSerializer(profile, data=profile_data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
