@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'django_extensions',
     'backend.profiles',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +53,18 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'backend.middleware.custom_disallowed_host_middleware',
 ]
+
+
+# Configurar Cloudinary como el backend de almacenamiento predeterminado
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Opcional: Configura una carpeta para las imágenes
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config("CLOUDINARY_CLOUD_NAME"),
+    'API_KEY': config("CLOUDINARY_API_KEY"),
+    'API_SECRET': config("CLOUDINARY_API_SECRET"),
+}
+
 
 # Cross-Origin Resource Sharing (CORS)
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default="").split(',')
