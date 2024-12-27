@@ -29,7 +29,6 @@
     position: relative;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
-    align-items: center;
     justify-content: center;
     height: 100vh;
     margin: 0;
@@ -229,6 +228,7 @@
 
 .signup-toggle-wrapper {
     display: flex;
+    flex-direction: column; /* Cambia la dirección a columna */
     align-items: center;
     justify-content: center;
     margin-top: 20px;
