@@ -10,6 +10,7 @@ from .models import UserProfile
 from django.contrib.auth.models import User
 
 class UserProfileSerializer(serializers.ModelSerializer):  # pylint: disable=too-few-public-methods
+    profile_picture = serializers.SerializerMethodField()
     """
     Serializador para el modelo UserProfile.
 
@@ -31,3 +32,8 @@ class UserProfileSerializer(serializers.ModelSerializer):  # pylint: disable=too
         """
         model = UserProfile
         fields = ["id", "full_name", "age", "gender", "profile_picture", "contact_number", "email"]
+    def get_profile_picture(self, obj):
+        if obj.profile_picture:
+            return obj.profile_picture.url
+        return "https://via.placeholder.com/150"  # URL predeterminada si no hay imagen
+    

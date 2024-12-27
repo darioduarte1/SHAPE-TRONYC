@@ -1,17 +1,8 @@
-"""
-Módulo de modelos y señales para la gestión de perfiles de usuario.
-
-Este módulo extiende el modelo de usuario predeterminado de Django con un perfil
-adicional que almacena información extra como nombre completo, edad, género, foto
-de perfil y número de contacto. Además, incluye señales para manejar automáticamente
-la creación y el guardado del perfil.
-"""
-
 from django.db import models
 from django.contrib.auth.models import User  # pylint: disable=imported-auth-user
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from cloudinary.models import CloudinaryField
 
 class UserProfile(models.Model):
     """
@@ -22,7 +13,7 @@ class UserProfile(models.Model):
         full_name (str): Nombre completo del usuario.
         age (int): Edad del usuario.
         gender (str): Género del usuario, con opciones 'Male', 'Female' y 'Other'.
-        profile_picture (ImageField): Imagen de perfil del usuario.
+        profile_picture (CloudinaryField): Imagen de perfil del usuario.
         contact_number (str): Número de contacto del usuario.
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -34,11 +25,7 @@ class UserProfile(models.Model):
         null=True,
         blank=True
     )
-    profile_picture = models.ImageField(
-        upload_to='profile_pictures/',
-        null=True,
-        blank=True
-    )
+    profile_picture = CloudinaryField('image', blank=True, null=True, max_length=255)
     contact_number = models.CharField(max_length=15, null=True, blank=True)
 
     def __str__(self):
@@ -53,7 +40,7 @@ class UserProfile(models.Model):
 
 # Señales para crear y guardar automáticamente el perfil de usuario
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):# pylint: disable=unused-argument
+def create_user_profile(sender, instance, created, **kwargs):  # pylint: disable=unused-argument
     """
     Crea automáticamente un perfil asociado al usuario al momento de su creación.
 
@@ -68,7 +55,7 @@ def create_user_profile(sender, instance, created, **kwargs):# pylint: disable=u
 
 
 @receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):# pylint: disable=unused-argument
+def save_user_profile(sender, instance, **kwargs):  # pylint: disable=unused-argument
     """
     Guarda automáticamente el perfil asociado al usuario.
 
@@ -77,4 +64,4 @@ def save_user_profile(sender, instance, **kwargs):# pylint: disable=unused-argum
         instance (User): Instancia del modelo User que disparó la señal.
         **kwargs: Argumentos adicionales.
     """
-    instance.userprofile.save()# pylint: disable=no-member
+    instance.userprofile.save()  # pylint: disable=no-member

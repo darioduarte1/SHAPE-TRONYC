@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import UserProfile
 from .serializers import UserProfileSerializer
+import cloudinary.uploader
 
 class ProfileView(APIView):
     """
@@ -53,9 +54,15 @@ class ProfileView(APIView):
             profile_data = request.data.copy()
             profile_file = request.FILES.get('profile_picture')  # La clave debe coincidir con el nombre en tu formulario
 
-            # Si se incluye un archivo, agrégalo a los datos a actualizar
+            # Si se incluye un archivo, subir a Cloudinary
             if profile_file:
-                profile_data['profile_picture'] = profile_file
+                upload_result = cloudinary.uploader.upload(
+                    profile_file,
+                    folder="profile_pictures/",
+                    public_id=f"user_{user_id}_profile_picture",
+                    overwrite=True,
+                )
+                profile_data['profile_picture'] = upload_result['secure_url']  # Guardar URL segura
 
             serializer = UserProfileSerializer(profile, data=profile_data, partial=True)
             if serializer.is_valid():
