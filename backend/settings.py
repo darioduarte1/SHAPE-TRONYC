@@ -1,7 +1,12 @@
 from pathlib import Path
 from datetime import timedelta
-from decouple import config
+from decouple import Config, RepositoryEnv
 import dj_database_url
+
+
+# Ruta al archivo .env
+ENV_PATH = Path(__file__).resolve().parent.parent / 'config' / '.env'
+config = Config(RepositoryEnv(ENV_PATH))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
