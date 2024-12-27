@@ -11,9 +11,9 @@ class ErrorBoundary extends React.Component {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error, errorInfo) {
-    // Puedes registrar el error en un servicio externo (como Sentry)
-    console.error('Error capturado por ErrorBoundary:', error, errorInfo);
+  componentDidCatch(error, info) {
+    console.error("Error capturado por ErrorBoundary:", error);
+    console.error("Información del error:", info);
   }
 
   render() {
