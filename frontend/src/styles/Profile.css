@@ -3,8 +3,26 @@
   height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #007bff;
+  position: relative;
+  border: 5px solid #000000; /* Marco de 5px alrededor de la foto */
 }
+
+.camera-icon {
+  position: absolute;
+  bottom: 120px; /* Subimos 200px desde la posición actual */
+  right: 90px; /* Movemos 100px hacia la izquierda desde la posición actual */
+  cursor: pointer;
+  background-color: white;
+  border-radius: 50%;
+  width: 40px; /* Ancho del ícono ajustado 5px más pequeño */
+  height: 40px; /* Altura igual al ancho */
+  display: flex; /* Centramos el contenido */
+  justify-content: center; /* Centrado horizontal */
+  align-items: center; /* Centrado vertical */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid #000000; /* Marco de 2px alrededor del ícono */
+}
+
 
 .profile-container {
     margin: 20px auto;
