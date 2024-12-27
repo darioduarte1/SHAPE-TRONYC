@@ -1,7 +1,12 @@
 from pathlib import Path
 from datetime import timedelta
-from decouple import config
+from decouple import Config, RepositoryEnv
 import dj_database_url
+
+
+# Ruta al archivo .env
+ENV_PATH = Path(__file__).resolve().parent.parent / 'config' / '.env'
+config = Config(RepositoryEnv(ENV_PATH))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,12 +15,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # Debug
-DEBUG = False
+DEBUG = True
 
-if DEBUG is False:
-    STATIC_URL = '/static/'
-    STATICFILES_DIRS = [BASE_DIR / 'static']
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = '/static/'
+
+if DEBUG:
+    STATICFILES_DIRS = [BASE_DIR / 'static']  # Para archivos estáticos en desarrollo
+else:
+    STATIC_ROOT = BASE_DIR / 'staticfiles'  # Para `collectstatic` en producción
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -34,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'django_extensions',
+    'backend.profiles',
 ]
 
 MIDDLEWARE = [
