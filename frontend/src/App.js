@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import LoginRegister from "./pages/LoginRegister";
 import Logout from "./pages/Logout";
 import Home from "./pages/Home";
+import Profile from './pages/Profile';
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                 <Route path="/auth" element={<LoginRegister />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/logout" element={<Logout />} />
+                <Route path="/profile" element={<Profile />} />
             </Routes>
             <ToastContainer
                 position="bottom-left"
