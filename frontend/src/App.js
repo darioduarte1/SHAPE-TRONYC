@@ -5,8 +5,8 @@ import "react-toastify/dist/ReactToastify.css";
 import LoginRegister from "./pages/LoginRegister";
 import Logout from "./pages/Logout";
 import Home from "./pages/Home";
-import Profile from './pages/Profile';
-
+import Profile from "./pages/Profile";
+import ErrorBoundary from "./components/shared/ErrorBoundary";
 
 function App() {
     const futureFlags = {
@@ -16,25 +16,27 @@ function App() {
 
     return (
         <Router future={futureFlags}>
-            <Routes>
-                <Route path="/" element={<Navigate to="/auth" replace />} />
-                <Route path="/auth" element={<LoginRegister />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/logout" element={<Logout />} />
-                <Route path="/profile" element={<Profile />} />
-            </Routes>
-            <ToastContainer
-                position="bottom-left"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="colored"
-            />
+            <ErrorBoundary>
+                <Routes>
+                    <Route path="/" element={<Navigate to="/auth" replace />} />
+                    <Route path="/auth" element={<LoginRegister />} />
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/logout" element={<Logout />} />
+                    <Route path="/profile" element={<Profile />} />
+                </Routes>
+                <ToastContainer
+                    position="bottom-left"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="colored"
+                />
+            </ErrorBoundary>
         </Router>
     );
 }
