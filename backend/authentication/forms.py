@@ -1,7 +1,7 @@
 # backend/authentication/forms.py
 
 from django import forms
-from django.contrib.auth.models import User
+from backend.profiles.models import UserProfile
 from django.core.exceptions import ValidationError
 
 class UserRegistrationForm(forms.ModelForm):
@@ -9,8 +9,8 @@ class UserRegistrationForm(forms.ModelForm):
     confirm_password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
-        model = User
-        fields = ('username', 'email', 'password')
+        model = UserProfile
+        fields = ('username', 'email', 'password', 'language', 'is_partner')
 
     def clean_confirm_password(self):
         password = self.cleaned_data.get("password")
