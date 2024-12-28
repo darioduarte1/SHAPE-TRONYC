@@ -206,7 +206,7 @@ const Profile = () => {
         </div>
         <div className="mb-3">
           <label htmlFor="contactPhone" className="form-label">
-            Teléfono de Contacto (si aplica)
+            Teléfono de Contacto
           </label>
           <input
             type="tel"
