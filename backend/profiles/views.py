@@ -30,29 +30,20 @@ class ProfileView(APIView):
             Response: Datos serializados del perfil o un error 404 si no existe.
         """
         try:
-            profile = UserProfile.objects.get(user__id=user_id)
+            profile = UserProfile.objects.get(id=user_id)
             serializer = UserProfileSerializer(profile)
             return Response(serializer.data)
         except UserProfile.DoesNotExist:
             return Response({"error": "Perfil no encontrado."}, status=404)
 
     def put(self, request, user_id):
-        print("=== DEPURACIÓN DE PUT ===")
-        print(f"Datos recibidos en request.data: {request.data}")
-        print(f"Archivos recibidos en request.FILES: {request.FILES}")
-
         try:
-            profile = UserProfile.objects.get(user__id=user_id)
+            profile = UserProfile.objects.get(id=user_id)  # Obtén el perfil por ID
             profile_data = request.data.copy()
-            profile_file = request.FILES.get('profile_picture')  # Verifica si se recibe el archivo
+            profile_file = request.FILES.get('profile_picture')  # Archivo opcional
 
-            # Debug adicional para inspeccionar detalles del archivo
+            # Subida de imagen si se proporciona
             if profile_file:
-                print(f"Nombre del archivo recibido: {profile_file.name}")
-                print(f"Tamaño del archivo recibido: {profile_file.size} bytes")
-                print(f"Tipo de contenido: {profile_file.content_type}")
-
-                # Subida a Cloudinary
                 upload_result = cloudinary.uploader.upload(
                     profile_file,
                     folder="profile_pictures/",
@@ -60,22 +51,22 @@ class ProfileView(APIView):
                     overwrite=True,
                 )
                 profile_data['profile_picture'] = upload_result['secure_url']
-                print(f"URL subida a Cloudinary: {upload_result['secure_url']}")
-            else:
-                print("No se recibió ningún archivo en la solicitud.")
 
+            # Manejo de full_name: descompone en first_name y last_name
+            full_name = profile_data.pop('full_name', [''])[0].strip()  # Asegúrate de manejar listas
+            if full_name:
+                name_parts = full_name.split(' ', 1)  # Divide el nombre completo en 2 partes
+                profile.first_name = name_parts[0]
+                profile.last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+            # Serializa y valida los datos restantes
             serializer = UserProfileSerializer(profile, data=profile_data, partial=True)
             if serializer.is_valid():
-                print("Datos validados correctamente.")
                 serializer.save()
-                print("Perfil actualizado exitosamente.")
                 return Response(serializer.data)
-            else:
-                print("Errores de validación en los datos:")
-                print(serializer.errors)
-                return Response(serializer.errors, status=400)
+            return Response(serializer.errors, status=400)
+
         except UserProfile.DoesNotExist:
-            print(f"Perfil con user_id {user_id} no encontrado.")
             return Response({"error": "Perfil no encontrado."}, status=404)
         except Exception as e:
             print(f"Error inesperado: {e}")
