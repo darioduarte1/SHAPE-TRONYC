@@ -1,9 +1,3 @@
-"""
-Configuración del administrador para la app profiles.
-
-Este módulo define la interfaz de administrador para gestionar el modelo UserProfile en el
-panel de administración de Django.
-"""
 from django.contrib import admin
 from .models import UserProfile
 
@@ -15,7 +9,8 @@ class UserProfileAdmin(admin.ModelAdmin):
     Esta clase personaliza la visualización de instancias de UserProfile en el panel de
     administración de Django.
     """
-    list_display = (
-    'user', 'full_name', 'age', 'gender', 'profile_picture',
-    'contact_number'
-    )
+    list_display = ('get_username', 'full_name', 'gender', 'age', 'email', 'contact_number', 'language', 'is_partner')
+
+    def get_username(self, obj):
+        return obj.username  # Devuelve el nombre de usuario asociado
+    get_username.short_description = 'Username'  # Título de la columna en el admin
