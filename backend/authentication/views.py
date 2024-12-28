@@ -10,12 +10,16 @@ from .forms import UserRegistrationForm
 
 # Vista para registrar usuarios
 class RegisterView(APIView):
-    permission_classes = [AllowAny]  # Permitir acceso sin autenticación
+    permission_classes = [AllowAny]
 
     def post(self, request):
         form = UserRegistrationForm(data=request.data)
         if form.is_valid():
-            form.save()
+            user = form.save(commit=False)
+            # Asegúrate de que los valores adicionales estén siendo asignados
+            user.language = request.data.get("language", "en")  # Valor por defecto: inglés
+            user.is_partner = request.data.get("is_partner", False)
+            user.save()
             return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
         return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     
     # Local apps
-    'backend.users',
     'backend.profiles',
 ]
 
@@ -124,7 +123,7 @@ DATABASES = {
     'default': dj_database_url.config(default=config('DATABASE_URL'), conn_max_age=600)
 }
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'profiles.UserProfile'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
