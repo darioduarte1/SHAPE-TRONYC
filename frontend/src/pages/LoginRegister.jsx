@@ -8,6 +8,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
 const LoginRegister = () => {
   const [isActive, setIsActive] = useState(false);
   const [isPartner, setIsPartner] = useState(false);
+  const [language, setLanguage] = useState("en"); // Idioma inicial
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -15,6 +16,58 @@ const LoginRegister = () => {
     confirmPassword: "",
   });
   const navigate = useNavigate();
+
+  const handleLanguageChange = (lang) => {
+    setLanguage(lang);
+  };
+
+  const translations = {
+    en: {
+      createAccount: "Create Account",
+      username: "Username",
+      email: "Email",
+      password: "Password",
+      confirmPassword: "Password",
+      signUp: "Sign Up",
+      logIn: "Log in",
+      welcomeBack: "Welcome back!",
+      enterDetails: "Please enter your details to log in",
+      hiFriend: "Hi, friend!",
+      registerData: "Register with your personal data",
+      useCredentials: "Use your email and password",
+      forgotPassword: "Forgot your password?",
+    },
+    es: {
+      createAccount: "Crear Cuenta",
+      username: "Usuario",
+      email: "Correo Electrónico",
+      password: "Contraseña",
+      confirmPassword: "Contraseña",
+      signUp: "Registrarse",
+      logIn: "Iniciar Sesión",
+      welcomeBack: "¡Bienvenido de nuevo!",
+      enterDetails: "Por favor, introduce tus datos para iniciar sesión",
+      hiFriend: "¡Hola, amigo!",
+      registerData: "Regístrate con tus datos personales",
+      useCredentials: "Usa tu correo y contraseña",
+      forgotPassword: "¿Olvidaste tu contraseña?",
+    },
+    pt: {
+      createAccount: "Criar Conta",
+      username: "Utilizador",
+      email: "Email",
+      password: "Palavra-passe",
+      confirmPassword: "Palavra-passe",
+      signUp: "Registar-se",
+      logIn: "Iniciar Sessão",
+      welcomeBack: "Bem-vindo de volta!",
+      enterDetails: "Por favor, insira os seus dados para iniciar sessão",
+      hiFriend: "Olá, amigo!",
+      registerData: "Registe-se com os seus dados pessoais",
+      useCredentials: "Use o seu email e palavra-passe",
+      forgotPassword: "Esqueceu-se da sua palavra-passe?",
+    },
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -44,7 +97,6 @@ const LoginRegister = () => {
         const data = await response.json();
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
-        // Asegurarnos de almacenar el user_id
         if (data.user_id) {
           localStorage.setItem("user_id", data.user_id);
         } else {
@@ -107,43 +159,63 @@ const LoginRegister = () => {
       >
         <div className="signup-form-container signup-sign-up">
           <div className="form">
-            <h1 className="centered-title">Create Account</h1>
-            <label htmlFor="username" className="sr-only">Username</label>
+            <h1 className="centered-title">{translations[language].createAccount}</h1>
+            {/* Botones de cambio de idioma */}
+            <div className="unique-language-buttons">
+              <button onClick={() => handleLanguageChange("en")} aria-label="English">
+                <img src="/images/flags/english.png" alt="English" />
+              </button>
+              <button onClick={() => handleLanguageChange("es")} aria-label="Español">
+                <img src="/images/flags/spanish.png" alt="Español" />
+              </button>
+              <button onClick={() => handleLanguageChange("pt")} aria-label="Português">
+                <img src="/images/flags/portuguese.png" alt="Português" />
+              </button>
+            </div>
+            <label htmlFor="username" className="sr-only">
+              {translations[language].username}
+            </label>
             <input
               type="text"
               id="username"
               name="username"
-              placeholder="Username"
+              placeholder={translations[language].username}
               value={formData.username}
               onChange={handleInputChange}
               autoComplete="username"
             />
-            <label htmlFor="email" className="sr-only">Email</label>
+            <label htmlFor="email" className="sr-only">
+              {translations[language].email}
+            </label>
             <input
               type="email"
               id="email"
               name="email"
-              placeholder="Email"
+              placeholder={translations[language].email}
               value={formData.email}
               onChange={handleInputChange}
               autoComplete="email"
             />
-            <label htmlFor="password" className="sr-only">Password</label>
+            <label htmlFor="password" className="sr-only">
+              {translations[language].password}
+            </label>
             <input
               type="password"
               id="password"
               name="password"
-              placeholder="Password"
+              placeholder={translations[language].password}
               value={formData.password}
               onChange={handleInputChange}
               autoComplete="new-password"
             />
-            <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
+            <label htmlFor="confirmPassword" className="sr-only">
+              {translations[language].confirmPassword}
+            </label>
             <input
               type="password"
               id="confirmPassword"
               name="confirmPassword"
-              placeholder="Confirm Password"
+              placeholder={translations[language].confirmPassword}
               value={formData.confirmPassword}
               onChange={handleInputChange}
               autoComplete="new-password"
@@ -164,60 +236,70 @@ const LoginRegister = () => {
                   {isPartner ? "Staff" : "User"}
                 </span>
               </div>
-              <button onClick={signup}>Sign Up</button>
+              <button onClick={signup}>{translations[language].signUp}</button>
             </div>
           </div>
         </div>
+
         <div className="signup-form-container signup-sign-in">
           <div className="form">
-            <h1>Log in</h1>
-            <span>Use your email and password</span>
-            <label htmlFor="loginUsername" className="sr-only">Username</label>
+            <h1>{translations[language].logIn}</h1>
+            <span>{translations[language].useCredentials}</span>
+            <label htmlFor="loginUsername" className="sr-only">
+              {translations[language].username}
+            </label>
             <input
               type="text"
               id="loginUsername"
               name="username"
-              placeholder="Username"
+              placeholder={translations[language].username}
               value={formData.username}
               onChange={handleInputChange}
             />
-            <label htmlFor="loginPassword" className="sr-only">Password</label>
+            <label htmlFor="loginPassword" className="sr-only">
+              {translations[language].password}
+            </label>
             <input
               type="password"
               id="loginPassword"
               name="password"
-              placeholder="Password"
+              placeholder={translations[language].password}
               value={formData.password}
               onChange={handleInputChange}
             />
-            <button onClick={login}>Log in</button>
-            <button onClick={() => toast.info("Función no implementada.")}>
-              Forgot your password?
+            <button onClick={login}>{translations[language].logIn}</button>
+            <button
+              onClick={() => toast.info("Función no implementada.")}
+              className="forgot-password-button"
+            >
+              <span>{translations[language].forgotPassword.split(" ")[0]}</span>
+              <span>{translations[language].forgotPassword.split(" ").slice(1).join(" ")}</span>
             </button>
           </div>
         </div>
+
         <div className="signup-toggle-container">
           <div className="signup-toggle">
             <div className="signup-toggle-panel signup-toggle-left">
-              <h1>Welcome back!</h1>
-              <p>Please enter your details to log in</p>
+              <h1>{translations[language].welcomeBack}</h1>
+              <p>{translations[language].enterDetails}</p>
               <button
                 className="signup-hidden"
                 id="login"
                 onClick={handleLoginClick}
               >
-                Log in
+                {translations[language].logIn}
               </button>
             </div>
             <div className="signup-toggle-panel signup-toggle-right">
-              <h1>Hi, friend!</h1>
-              <p>Register with your personal data</p>
+              <h1>{translations[language].hiFriend}</h1>
+              <p>{translations[language].registerData}</p>
               <button
                 className="signup-hidden"
                 id="register"
                 onClick={handleRegisterClick}
               >
-                Sign Up
+                {translations[language].signUp}
               </button>
             </div>
           </div>
