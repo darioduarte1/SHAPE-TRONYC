@@ -116,35 +116,36 @@ const LoginRegister = () => {
 
   const signup = async () => {
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Las contraseñas no coinciden.");
-      return;
+        toast.error("Las contraseñas no coinciden.");
+        return;
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          confirm_password: formData.confirmPassword,
-          is_partner: isPartner,
-        }),
-      });
+        const response = await fetch(`${API_BASE_URL}/auth/register/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                username: formData.username,
+                email: formData.email,
+                password: formData.password,
+                confirm_password: formData.confirmPassword,
+                is_partner: isPartner,
+                language: language, // Se agrega el idioma seleccionado
+            }),
+        });
 
-      if (response.ok) {
-        toast.success("Registro exitoso. Ahora puedes iniciar sesión.");
-        setIsActive(false);
-      } else {
-        const errorData = await response.json();
-        toast.error(`Error al registrarse: ${JSON.stringify(errorData)}`);
-      }
+        if (response.ok) {
+            toast.success("Registro exitoso. Ahora puedes iniciar sesión.");
+            setIsActive(false);
+        } else {
+            const errorData = await response.json();
+            toast.error(`Error al registrarse: ${JSON.stringify(errorData)}`);
+        }
     } catch (err) {
-      console.error("Error al registrarse", err);
-      toast.error("Error al registrarse. Por favor, intenta nuevamente.");
+        console.error("Error al registrarse", err);
+        toast.error("Error al registrarse. Por favor, intenta nuevamente.");
     }
   };
 
