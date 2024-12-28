@@ -70,6 +70,7 @@ const Profile = () => {
     data.append("gender", formData.gender);
 
     if (formData.profilePhoto) {
+      console.log(`Archivo seleccionado: ${formData.profilePhoto.name}, tamaño: ${formData.profilePhoto.size}`);
       console.log("Archivo adjuntado al FormData:", formData.profilePhoto); // DEBUG: Verificar el archivo antes de añadirlo
       data.append("profile_picture", formData.profilePhoto);
     } else {
