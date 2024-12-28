@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css"; // Importación de Bootstrap Icons
@@ -7,6 +8,7 @@ import "../styles/Profile.css";
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 const Profile = () => {
+  const navigate = useNavigate(); // Instancia del hook para redirección
   const [formData, setFormData] = useState({
     fullName: "",
     age: "",
@@ -101,6 +103,7 @@ const Profile = () => {
           profilePictureUrl: updatedData.profile_picture || "https://via.placeholder.com/150",
         }));
         toast.success("Perfil actualizado con éxito.");
+        navigate("/home"); // Redirige a la página de inicio
       } else {
         const errorData = await response.json();
         console.error("Errores del servidor:", errorData); // DEBUG: Verificar errores del servidor
