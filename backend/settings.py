@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
@@ -186,3 +187,7 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
