@@ -1,22 +1,12 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
-class UserProfile(models.Model):
+class UserProfile(AbstractUser):
     """
-    Modelo para extender la funcionalidad del usuario con datos adicionales.
+    Modelo personalizado de usuario que extiende AbstractUser.
 
-    Atributos:
-        user (User): Relación uno a uno con el modelo de usuario de Django.
-        full_name (str): Nombre completo del usuario.
-        age (int): Edad del usuario.
-        gender (str): Género del usuario, con opciones 'Male', 'Female' y 'Other'.
-        profile_picture (URLField): URL de la imagen de perfil del usuario.
-        contact_number (str): Número de contacto del usuario.
+    Agrega campos adicionales como `age`, `gender`, `profile_picture`, y propiedades personalizadas como `full_name`.
     """
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=255, blank=True)
     age = models.IntegerField(null=True, blank=True)
     gender = models.CharField(
         max_length=50,
@@ -24,43 +14,27 @@ class UserProfile(models.Model):
         null=True,
         blank=True
     )
-    profile_picture = models.URLField(max_length=500, blank=True, null=True)  # Cambiado a URLField
+    profile_picture = models.URLField(max_length=500, blank=True, null=True)
     contact_number = models.CharField(max_length=15, null=True, blank=True)
+    language = models.CharField(
+        max_length=10,
+        choices=[
+            ('en', 'English'),
+            ('es', 'Español'),
+            ('pt', 'Português')
+        ],
+        default='en'
+    )
+    is_partner = models.BooleanField(default=False)
+
+    @property
+    def full_name(self):
+        """
+        Devuelve el nombre completo del usuario basado en `first_name` y `last_name`.
+        Si ambos están vacíos, devuelve el username.
+        """
+        full_name = f"{self.first_name} {self.last_name}".strip()
+        return full_name if full_name else self.username
 
     def __str__(self):
-        """
-        Devuelve una representación en cadena del perfil del usuario.
-
-        Si el nombre completo está disponible, lo devuelve. De lo contrario,
-        devuelve el nombre de usuario o un valor por defecto.
-
-        Returns:
-            str: Nombre completo, nombre de usuario o 'Sin nombre'.
-        """
-        return str(self.full_name or self.user.username or "Sin nombre")
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    """
-    Crea automáticamente un perfil asociado al usuario al momento de su creación.
-
-    Args:
-        sender (type): Modelo que envía la señal, en este caso User.
-        instance (User): Instancia del modelo User que disparó la señal.
-        created (bool): Indica si el usuario fue creado.
-        **kwargs: Argumentos adicionales que no se usan en esta función.
-    """
-    if created:
-        UserProfile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    """
-    Guarda automáticamente el perfil asociado al usuario.
-
-    Args:
-        sender (type): Modelo que envía la señal, en este caso User.
-        instance (User): Instancia del modelo User que disparó la señal.
-        **kwargs: Argumentos adicionales.
-    """
-    instance.userprofile.save()
+        return self.full_name or "Sin nombre"

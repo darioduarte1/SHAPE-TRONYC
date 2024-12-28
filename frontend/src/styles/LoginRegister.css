@@ -74,6 +74,8 @@
     text-transform: uppercase;
     margin-top: 10px;
     cursor: pointer;
+    min-width: 150px; /* Ajusta el ancho mínimo del botón */
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
 }
 
 .signup-container button.signup-hidden {
@@ -231,7 +233,6 @@
     flex-direction: column; /* Cambia la dirección a columna */
     align-items: center;
     justify-content: center;
-    margin-top: 20px;
 }
 
 .switch {
@@ -290,3 +291,72 @@ input:checked + .slider:before {
     font-size: 14px;
     font-weight: 600;
 }
+
+input::placeholder {
+    font-size: 10px; /* Ajusta el tamaño del texto */
+    color: #aaa; /* Color del placeholder */
+}
+
+div.signup-sign-in .forgot-password-button {
+    font-size: 8px; /* Tamaño más pequeño */
+    line-height: 1.2; /* Espaciado entre líneas */
+    text-align: center; /* Centra el texto */
+    padding: 5px 5px; /* Ajusta el padding */
+}
+
+.forgot-password-button span {
+    display: block; /* Asegura que cada línea esté en un bloque separado */
+}
+
+.forgot-password-button:hover {
+    text-decoration: underline; /* Opcional: subrayar al pasar el cursor */
+}
+
+#login-title {
+    text-align: center;
+    margin: 0 auto;
+    font-size: 2rem !important; /* Asegura que el tamaño sea igual al de 'Create Account' */
+    font-weight: bold !important; /* Asegura que el peso sea igual al de 'Create Account' */
+    line-height: 1.2; /* Opcional: ajusta el espaciado entre líneas si es necesario */
+}
+
+/* #############################
+##### Styles das bandeiras #####
+############################# */
+
+.unique-language-buttons {
+    all: unset; /* Resetea todos los estilos heredados */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.unique-language-buttons button {
+    all: unset; /* Resetea estilos específicos */
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out;
+}
+
+.unique-language-buttons button:hover {
+    transform: scale(1.1);
+}
+
+.unique-language-buttons img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ############################# */

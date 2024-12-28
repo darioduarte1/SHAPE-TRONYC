@@ -70,6 +70,7 @@ const Profile = () => {
     data.append("gender", formData.gender);
 
     if (formData.profilePhoto) {
+      console.log(`Archivo seleccionado: ${formData.profilePhoto.name}, tamaño: ${formData.profilePhoto.size}`);
       console.log("Archivo adjuntado al FormData:", formData.profilePhoto); // DEBUG: Verificar el archivo antes de añadirlo
       data.append("profile_picture", formData.profilePhoto);
     } else {
@@ -205,7 +206,7 @@ const Profile = () => {
         </div>
         <div className="mb-3">
           <label htmlFor="contactPhone" className="form-label">
-            Teléfono de Contacto (si aplica)
+            Teléfono de Contacto
           </label>
           <input
             type="tel"
