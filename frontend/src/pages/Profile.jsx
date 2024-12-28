@@ -124,7 +124,7 @@ const Profile = () => {
           alt="Foto de Perfil"
           className="profile-photo-circle"
         />
-        <label htmlFor="profilePhoto" className="camera-icon">
+        <label htmlFor="profilePhoto" className="camera-icon" aria-label="Actualizar Foto de Perfil">
           <i className="bi bi-camera" style={{ fontSize: "24px", color: "gray" }}></i>
         </label>
         <input
