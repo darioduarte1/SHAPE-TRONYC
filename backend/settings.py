@@ -27,19 +27,25 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
 
 # Application definition
 INSTALLED_APPS = [
+    # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sessions',
     'django.contrib.staticfiles',
-    'corsheaders',
-    'rest_framework',
-    'rest_framework_simplejwt.token_blacklist',
-    'django_extensions',
-    'backend.profiles',
+    
+    # Third-party apps
     'cloudinary',
     'cloudinary_storage',
+    'corsheaders',
+    'django_extensions',
+    'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
+    
+    # Local apps
+    'backend.users',
+    'backend.profiles',
 ]
 
 MIDDLEWARE = [
@@ -117,6 +123,8 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(default=config('DATABASE_URL'), conn_max_age=600)
 }
+
+AUTH_USER_MODEL = 'users.CustomUser'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

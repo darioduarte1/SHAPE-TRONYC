@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -15,7 +15,7 @@ class UserProfile(models.Model):
         profile_picture (URLField): URL de la imagen de perfil del usuario.
         contact_number (str): Número de contacto del usuario.
     """
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=255, blank=True)
     age = models.IntegerField(null=True, blank=True)
     gender = models.CharField(
@@ -39,7 +39,7 @@ class UserProfile(models.Model):
         """
         return str(self.full_name or self.user.username or "Sin nombre")
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_profile(sender, instance, created, **kwargs):
     """
     Crea automáticamente un perfil asociado al usuario al momento de su creación.
@@ -53,7 +53,7 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def save_user_profile(sender, instance, **kwargs):
     """
     Guarda automáticamente el perfil asociado al usuario.
