@@ -34,7 +34,6 @@ const LoginRegister = () => {
       enterDetails: "Please enter your details to log in",
       hiFriend: "Hi, friend!",
       registerData: "Register with your personal data",
-      useCredentials: "Use your email and password",
       forgotPassword: "Forgot your password?",
     },
     es: {
@@ -49,7 +48,6 @@ const LoginRegister = () => {
       enterDetails: "Por favor, introduce tus datos para iniciar sesión",
       hiFriend: "¡Hola, amigo!",
       registerData: "Regístrate con tus datos personales",
-      useCredentials: "Usa tu correo y contraseña",
       forgotPassword: "¿Olvidaste tu contraseña?",
     },
     pt: {
@@ -64,7 +62,6 @@ const LoginRegister = () => {
       enterDetails: "Por favor, insira os seus dados para iniciar sessão",
       hiFriend: "Olá, amigo!",
       registerData: "Registe-se com os seus dados pessoais",
-      useCredentials: "Use o seu email e palavra-passe",
       forgotPassword: "Esqueceu-se da sua palavra-passe?",
     },
   };
@@ -243,8 +240,7 @@ const LoginRegister = () => {
 
         <div className="signup-form-container signup-sign-in">
           <div className="form">
-            <h1>{translations[language].logIn}</h1>
-            <span>{translations[language].useCredentials}</span>
+            <h1 id="login-title">{translations[language].logIn}</h1>
             <label htmlFor="loginUsername" className="sr-only">
               {translations[language].username}
             </label>

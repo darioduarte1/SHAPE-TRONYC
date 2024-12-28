@@ -233,7 +233,6 @@
     flex-direction: column; /* Cambia la dirección a columna */
     align-items: center;
     justify-content: center;
-    margin-top: 20px;
 }
 
 .switch {
@@ -311,6 +310,14 @@ div.signup-sign-in .forgot-password-button {
 
 .forgot-password-button:hover {
     text-decoration: underline; /* Opcional: subrayar al pasar el cursor */
+}
+
+#login-title {
+    text-align: center;
+    margin: 0 auto;
+    font-size: 2rem !important; /* Asegura que el tamaño sea igual al de 'Create Account' */
+    font-weight: bold !important; /* Asegura que el peso sea igual al de 'Create Account' */
+    line-height: 1.2; /* Opcional: ajusta el espaciado entre líneas si es necesario */
 }
 
 /* #############################
