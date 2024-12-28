@@ -55,7 +55,7 @@ const Header = () => {
                     >
                         <span className="navbar-toggler-icon"></span>
                     </button>
-                    <span className="navbar-brand">Mi App</span>
+                    <span className="navbar-brand">Shape-Tronyc</span>
                     {/* Dropdown en el lado derecho */}
                     <div className="dropdown">
                         <button
