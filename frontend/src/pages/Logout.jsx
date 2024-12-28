@@ -10,6 +10,7 @@ const Logout = () => {
             // Limpia los tokens del localStorage
             localStorage.removeItem("access");
             localStorage.removeItem("refresh");
+            localStorage.removeItem("user_id");
 
             // Muestra un solo toast y redirige
             toast.success("Logout realizado con éxito", { toastId: "logout-success" });

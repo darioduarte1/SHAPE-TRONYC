@@ -44,6 +44,14 @@ const LoginRegister = () => {
         const data = await response.json();
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
+        // Asegurarnos de almacenar el user_id
+        if (data.user_id) {
+          localStorage.setItem("user_id", data.user_id);
+        } else {
+          console.error("El user_id no fue proporcionado por el servidor.");
+          toast.error("Error al iniciar sesión: falta el user_id.");
+          return;
+        }
         navigate("/home");
       } else {
         const errorData = await response.json();
