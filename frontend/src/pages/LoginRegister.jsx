@@ -31,6 +31,7 @@ const LoginRegister = () => {
       signUp: "Sign Up",
       logIn: "Log in",
       welcomeBack: "Welcome back!",
+      enterLanguage: "Please select a language",
       enterDetails: "Please enter your details to log in",
       hiFriend: "Hi, friend!",
       registerData: "Register with your personal data",
@@ -45,6 +46,7 @@ const LoginRegister = () => {
       signUp: "Registrarse",
       logIn: "Iniciar Sesión",
       welcomeBack: "¡Bienvenido de nuevo!",
+      enterLanguage: "Por favor, selecciona un idioma",
       enterDetails: "Por favor, introduce tus datos para iniciar sesión",
       hiFriend: "¡Hola, amigo!",
       registerData: "Regístrate con tus datos personales",
@@ -59,6 +61,7 @@ const LoginRegister = () => {
       signUp: "Registar-se",
       logIn: "Iniciar Sessão",
       welcomeBack: "Bem-vindo de volta!",
+      enterLanguage: "Por favor, escolha um idioma",
       enterDetails: "Por favor, insira os seus dados para iniciar sessão",
       hiFriend: "Olá, amigo!",
       registerData: "Registe-se com os seus dados pessoais",
@@ -116,36 +119,36 @@ const LoginRegister = () => {
 
   const signup = async () => {
     if (formData.password !== formData.confirmPassword) {
-        toast.error("Las contraseñas no coinciden.");
-        return;
+      toast.error("Las contraseñas no coinciden.");
+      return;
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/register/`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: formData.username,
-                email: formData.email,
-                password: formData.password,
-                confirm_password: formData.confirmPassword,
-                is_partner: isPartner,
-                language: language, // Se agrega el idioma seleccionado
-            }),
-        });
+      const response = await fetch(`${API_BASE_URL}/auth/register/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          confirm_password: formData.confirmPassword,
+          is_partner: isPartner,
+          language: language, // Se agrega el idioma seleccionado
+        }),
+      });
 
-        if (response.ok) {
-            toast.success("Registro exitoso. Ahora puedes iniciar sesión.");
-            setIsActive(false);
-        } else {
-            const errorData = await response.json();
-            toast.error(`Error al registrarse: ${JSON.stringify(errorData)}`);
-        }
+      if (response.ok) {
+        toast.success("Registro exitoso. Ahora puedes iniciar sesión.");
+        setIsActive(false);
+      } else {
+        const errorData = await response.json();
+        toast.error(`Error al registrarse: ${JSON.stringify(errorData)}`);
+      }
     } catch (err) {
-        console.error("Error al registrarse", err);
-        toast.error("Error al registrarse. Por favor, intenta nuevamente.");
+      console.error("Error al registrarse", err);
+      toast.error("Error al registrarse. Por favor, intenta nuevamente.");
     }
   };
 
@@ -278,7 +281,18 @@ const LoginRegister = () => {
         <div className="signup-toggle-container">
           <div className="signup-toggle">
             <div className="signup-toggle-panel signup-toggle-left">
-              <h1>{translations[language].welcomeBack}</h1>
+              <h1 className={language === 'pt' ? 'portuguese-title' : 'default-title'}>
+                {language === 'pt' ? (
+                  <>
+                    <span>Bem-vindo</span>
+                    <br />
+                    <span>de volta</span>
+                  </>
+                ) : (
+                  translations[language].welcomeBack
+                )}
+              </h1>
+              <p>{translations[language].enterLanguage}</p>
               <p>{translations[language].enterDetails}</p>
               <button
                 className="signup-hidden"
