@@ -1,0 +1,114 @@
+.security-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+}
+
+.security-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.accordion-item {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.accordion-button {
+    width: 100%;
+    text-align: left;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.accordion-button:hover {
+    background: #0056b3;
+}
+
+.accordion-content {
+    padding: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.security-input {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 18px; /* Texto más grande */
+}
+
+.security-input::placeholder {
+    font-size: 18px; /* Tamaño de la fuente del placeholder */
+    color: #888; /* Color del placeholder */
+}
+
+.security-submit-button {
+    width: 100%;
+    padding: 15px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.security-submit-button:hover {
+    background: #0056b3;
+}
+
+.language-options {
+    display: flex;
+    justify-content: center;
+    gap: 40px; /* Incrementa el espaciado entre las banderas */
+    padding: 20px 0;
+}
+
+.language-button {
+    background: none;
+    border: none;
+    border-radius: 50%;
+    width: 70px; /* Tamaño fijo para mantener la forma circular */
+    height: 70px; /* Igual que el width para asegurar un círculo perfecto */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.language-button img {
+    width: 100%; /* Rellena completamente el botón */
+    height: 100%; /* Rellena completamente el botón */
+    object-fit: cover; /* Asegura que la imagen mantenga proporción */
+    border-radius: 50%; /* Hace la imagen circular */
+}
+
+.language-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.language-button.selected {
+    box-shadow: 0 0 10px #007bff;
+}

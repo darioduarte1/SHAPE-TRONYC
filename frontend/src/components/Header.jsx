@@ -18,16 +18,19 @@ const Header = () => {
         en: {
             menu: "Menu",
             profile: "Profile",
+            security: "Security",
             logout: "Logout",
         },
         es: {
             menu: "Menú",
             profile: "Perfil",
+            security: "Seguridad",
             logout: "Cerrar sesión",
         },
         pt: {
             menu: "Menu",
             profile: "Perfil",
+            security: "Segurança",
             logout: "Sair",
         },
     };
@@ -95,6 +98,11 @@ const Header = () => {
                             <li>
                                 <a className="dropdown-item" href="/profile">
                                     {translations[language].profile}
+                                </a>
+                            </li>
+                            <li>
+                                <a className="dropdown-item" href="/security">
+                                    {translations[language].security}
                                 </a>
                             </li>
                             <li>
