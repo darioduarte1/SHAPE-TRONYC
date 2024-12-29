@@ -14,6 +14,19 @@
     font-weight: bold;
 }
 
+div.signup-toggle-panel.signup-toggle-left h1.portuguese-title {
+    font-size: 2 rem !important; /* Aumenta significativamente el tamaño del texto */
+    line-height: 0.7 !important; /* Reduce aún más la separación entre líneas */
+    text-align: center !important; /* Centra el texto */
+    margin: 0 auto !important; /* Asegura que esté centrado horizontalmente */
+}
+
+div.signup-toggle-panel.signup-toggle-left h1.portuguese-title span {
+    display: block !important; /* Cada parte del texto en su propia línea */
+    white-space: nowrap !important; /* Evita divisiones de palabras */
+    font-size: inherit !important; /* Asegura que el tamaño de la fuente sea el mismo */
+}
+
 .sr-only {
     position: absolute;
     width: 1px;
