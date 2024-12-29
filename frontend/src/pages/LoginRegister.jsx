@@ -104,6 +104,12 @@ const LoginRegister = () => {
           toast.error("Error al iniciar sesión: falta el user_id.");
           return;
         }
+        if (data.language) {
+          localStorage.setItem("language", data.language);
+        } else {
+          console.error("El idioma no fue proporcionado por el servidor.");
+          toast.error("Error al iniciar sesión: falta el idioma del usuario.");
+        }
         navigate("/home");
       } else {
         const errorData = await response.json();

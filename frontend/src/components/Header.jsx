@@ -9,6 +9,29 @@ const Header = () => {
     const leftButtonRef = useRef(null);
     const leftOffcanvasInstanceRef = useRef(null);
 
+    // Idioma inicial basado en el idioma registrado (ejemplo: almacenado en localStorage)
+    const initialLanguage = localStorage.getItem("language") || "en";
+    const [language] = React.useState(initialLanguage);
+
+    // Traducciones para el Header
+    const translations = {
+        en: {
+            menu: "Menu",
+            profile: "Profile",
+            logout: "Logout",
+        },
+        es: {
+            menu: "Menú",
+            profile: "Perfil",
+            logout: "Cerrar sesión",
+        },
+        pt: {
+            menu: "Menu",
+            profile: "Perfil",
+            logout: "Sair",
+        },
+    };
+
     const handleOpenOffcanvas = () => {
         const offcanvasElement = leftOffcanvasRef.current;
         const buttonElement = leftButtonRef.current;
@@ -56,7 +79,8 @@ const Header = () => {
                         <span className="navbar-toggler-icon"></span>
                     </button>
                     <span className="navbar-brand">Shape-Tronyc</span>
-                    {/* Dropdown en el lado derecho */}
+
+                    {/* Dropdown de configuración */}
                     <div className="dropdown">
                         <button
                             className="btn btn-secondary"
@@ -70,7 +94,7 @@ const Header = () => {
                         <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
                             <li>
                                 <a className="dropdown-item" href="/profile">
-                                    Profile
+                                    {translations[language].profile}
                                 </a>
                             </li>
                             <li>
@@ -81,7 +105,7 @@ const Header = () => {
                                     className="btn btn-danger w-100"
                                     onClick={() => navigate("/logout")}
                                 >
-                                    Logout
+                                    {translations[language].logout}
                                 </button>
                             </li>
                         </ul>
@@ -99,11 +123,11 @@ const Header = () => {
             >
                 <div className="offcanvas-header">
                     <h5 className="offcanvas-title" id="leftOffcanvasLabel">
-                        Menú
+                        {translations[language].menu}
                     </h5>
                 </div>
                 <div className="offcanvas-body">
-                    <p>Contenido del menú desplegable izquierdo.</p>
+                    <p>{translations[language].menu} content goes here...</p>
                 </div>
             </div>
         </header>
