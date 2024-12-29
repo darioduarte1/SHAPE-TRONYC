@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import Header from "../components/Header";
 import "../styles/Security.css";
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+
 const Security = () => {
   const [activeSection, setActiveSection] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState(
@@ -47,10 +49,36 @@ const Security = () => {
     setActiveSection(activeSection === section ? null : section);
   };
 
-  const handleLanguageChange = (lang) => {
-    setSelectedLanguage(lang);
-    localStorage.setItem("language", lang);
-    window.location.reload(); // Refresca la página para aplicar el nuevo idioma
+  const handleLanguageChange = async (lang) => {
+    try {
+      // Cambia el idioma en el estado local y en localStorage
+      setSelectedLanguage(lang);
+      localStorage.setItem("language", lang);
+
+      // Realiza la solicitud al backend para actualizar el idioma del perfil
+      const response = await fetch(
+        `${API_BASE_URL}/api/profiles/${localStorage.getItem("user_id")}/`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access")}`,
+          },
+          body: JSON.stringify({ language: lang }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Error al actualizar el idioma en el backend.");
+      } else {
+        console.log("Idioma actualizado en el backend.");
+      }
+
+      // Refresca la página para aplicar el nuevo idioma
+      window.location.reload();
+    } catch (error) {
+      console.error("Error al actualizar el idioma:", error);
+    }
   };
 
   return (
