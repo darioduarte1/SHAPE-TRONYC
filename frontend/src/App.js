@@ -6,6 +6,7 @@ import LoginRegister from "./pages/LoginRegister";
 import Logout from "./pages/Logout";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import Security from "./pages/Security";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
                     <Route path="/home" element={<Home />} />
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/security" element={<Security />} />
                 </Routes>
                 <ToastContainer
                     position="bottom-left"
