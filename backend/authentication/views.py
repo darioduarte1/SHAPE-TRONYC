@@ -34,10 +34,12 @@ class LoginView(APIView):
 
         if user:
             refresh = RefreshToken.for_user(user)
+            # Incluye el idioma del usuario en la respuesta
             return Response({
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
-                "user_id": user.id
+                "user_id": user.id,
+                "language": user.language  # Devuelve el idioma registrado del usuario
             }, status=status.HTTP_200_OK)
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 

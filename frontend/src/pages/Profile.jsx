@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-icons/font/bootstrap-icons.css"; // Importación de Bootstrap Icons
+import "bootstrap-icons/font/bootstrap-icons.css";
 import "../styles/Profile.css";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 const Profile = () => {
-  const navigate = useNavigate(); // Instancia del hook para redirección
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     age: "",
@@ -16,8 +16,51 @@ const Profile = () => {
     profilePhoto: null,
     email: "",
     contactPhone: "",
-    profilePictureUrl: "https://via.placeholder.com/150", // Placeholder inicial
+    profilePictureUrl: "https://via.placeholder.com/150",
   });
+
+  // Obtén el idioma almacenado en el localStorage
+  const language = localStorage.getItem("language") || "en";
+
+  // Traducciones
+  const translations = {
+    en: {
+      updateProfile: "Update Profile Information",
+      fullName: "Full Name",
+      age: "Age",
+      gender: "Gender",
+      male: "Male",
+      female: "Female",
+      other: "Other",
+      email: "Email",
+      contactPhone: "Contact Phone",
+      updateButton: "Update Profile",
+    },
+    es: {
+      updateProfile: "Actualizar Información de Perfil",
+      fullName: "Nombre Completo",
+      age: "Edad",
+      gender: "Género",
+      male: "Masculino",
+      female: "Femenino",
+      other: "Otro",
+      email: "Correo Electrónico",
+      contactPhone: "Teléfono de Contacto",
+      updateButton: "Actualizar Perfil",
+    },
+    pt: {
+      updateProfile: "Atualizar Informações do Perfil",
+      fullName: "Nome Completo",
+      age: "Idade",
+      gender: "Gênero",
+      male: "Masculino",
+      female: "Feminino",
+      other: "Outro",
+      email: "Email",
+      contactPhone: "Telefone de Contato",
+      updateButton: "Atualizar Perfil",
+    },
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -38,8 +81,8 @@ const Profile = () => {
             fullName: data.full_name || "",
             age: data.age || "",
             gender: data.gender || "M",
-            profilePhoto: null, // Se usa para la nueva subida
-            profilePictureUrl: data.profile_picture || "https://via.placeholder.com/150", // Foto de Cloudinary o placeholder
+            profilePhoto: null,
+            profilePictureUrl: data.profile_picture || "https://via.placeholder.com/150",
             email: data.email || "",
             contactPhone: data.contact_number || "",
           });
@@ -57,7 +100,6 @@ const Profile = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    console.log("Archivo seleccionado:", file); // DEBUG: Verificar el archivo seleccionado
     setFormData({ ...formData, profilePhoto: file });
   };
 
@@ -70,19 +112,10 @@ const Profile = () => {
     data.append("gender", formData.gender);
 
     if (formData.profilePhoto) {
-      console.log(`Archivo seleccionado: ${formData.profilePhoto.name}, tamaño: ${formData.profilePhoto.size}`);
-      console.log("Archivo adjuntado al FormData:", formData.profilePhoto); // DEBUG: Verificar el archivo antes de añadirlo
       data.append("profile_picture", formData.profilePhoto);
-    } else {
-      console.warn("No se ha seleccionado ningún archivo para subir."); // DEBUG: Mensaje si no hay archivo
     }
 
     data.append("contact_number", formData.contactPhone);
-
-    console.log("Datos enviados en FormData:");
-    for (let pair of data.entries()) {
-      console.log(`${pair[0]}:`, pair[1]); // DEBUG: Verificar todos los datos en FormData
-    }
 
     try {
       const response = await fetch(
@@ -92,43 +125,40 @@ const Profile = () => {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access")}`,
           },
-          body: data, // FormData object
+          body: data,
         }
       );
 
       if (response.ok) {
         const updatedData = await response.json();
-        console.log("Respuesta del servidor:", updatedData); // DEBUG: Verificar respuesta del servidor
         setFormData((prevState) => ({
           ...prevState,
           profilePictureUrl: updatedData.profile_picture || "https://via.placeholder.com/150",
         }));
-        toast.success("Perfil actualizado con éxito.");
-        navigate("/home"); // Redirige a la página de inicio
+        toast.success(translations[language].updateButton + " success!");
+        navigate("/home");
       } else {
         const errorData = await response.json();
-        console.error("Errores del servidor:", errorData); // DEBUG: Verificar errores del servidor
         toast.error(
-          `Error al actualizar el perfil: ${errorData.error || "Revisa los datos ingresados."}`
+          `Error: ${errorData.error || "Please check the input data."}`
         );
       }
     } catch (err) {
-      console.error("Error en la solicitud:", err); // DEBUG: Verificar error en la solicitud
+      console.error("Error en la solicitud:", err);
       toast.error("Error al actualizar el perfil. Intenta nuevamente.");
     }
   };
 
   return (
     <div className="container mt-5">
-      <h2 className="mb-4">Actualizar Información de Perfil</h2>
-      {/* Mostrar la imagen dentro de un círculo */}
+      <h2 className="mb-4">{translations[language].updateProfile}</h2>
       <div className="text-center mb-4 position-relative">
         <img
-          src={formData.profilePictureUrl} // Usar URL de Cloudinary o placeholder
-          alt="Foto de Perfil"
+          src={formData.profilePictureUrl}
+          alt="Profile"
           className="profile-photo-circle"
         />
-        <label htmlFor="profilePhoto" className="camera-icon" aria-label="Actualizar Foto de Perfil">
+        <label htmlFor="profilePhoto" className="camera-icon" aria-label={translations[language].updateProfile}>
           <i className="bi bi-camera" style={{ fontSize: "24px", color: "gray" }}></i>
         </label>
         <input
@@ -139,10 +169,9 @@ const Profile = () => {
         />
       </div>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
-        {/* Resto del formulario */}
         <div className="mb-3">
           <label htmlFor="fullName" className="form-label">
-            Nombre Completo
+            {translations[language].fullName}
           </label>
           <input
             type="text"
@@ -158,7 +187,7 @@ const Profile = () => {
         </div>
         <div className="mb-3">
           <label htmlFor="age" className="form-label">
-            Edad
+            {translations[language].age}
           </label>
           <input
             type="number"
@@ -174,7 +203,7 @@ const Profile = () => {
         </div>
         <div className="mb-3">
           <label htmlFor="gender" className="form-label">
-            Género
+            {translations[language].gender}
           </label>
           <select
             className="form-select"
@@ -186,14 +215,14 @@ const Profile = () => {
             }
             required
           >
-            <option value="M">Masculino</option>
-            <option value="F">Femenino</option>
-            <option value="O">Otro</option>
+            <option value="M">{translations[language].male}</option>
+            <option value="F">{translations[language].female}</option>
+            <option value="O">{translations[language].other}</option>
           </select>
         </div>
         <div className="mb-3">
           <label htmlFor="email" className="form-label">
-            Correo Electrónico
+            {translations[language].email}
           </label>
           <input
             type="email"
@@ -206,7 +235,7 @@ const Profile = () => {
         </div>
         <div className="mb-3">
           <label htmlFor="contactPhone" className="form-label">
-            Teléfono de Contacto
+            {translations[language].contactPhone}
           </label>
           <input
             type="tel"
@@ -220,7 +249,7 @@ const Profile = () => {
           />
         </div>
         <button type="submit" className="btn btn-primary">
-          Actualizar Perfil
+          {translations[language].updateButton}
         </button>
       </form>
     </div>
