@@ -161,13 +161,13 @@ const LoginRegister = () => {
             {/* Botones de cambio de idioma */}
             <div className="unique-language-buttons">
               <button onClick={() => handleLanguageChange("en")} aria-label="English">
-                <img src="/images/flags/english.png" alt="English" />
+                <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/English.png" alt="English" />
               </button>
               <button onClick={() => handleLanguageChange("es")} aria-label="Español">
-                <img src="/images/flags/spanish.png" alt="Español" />
+                <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/Spanish.png" alt="Español" />
               </button>
               <button onClick={() => handleLanguageChange("pt")} aria-label="Português">
-                <img src="/images/flags/portuguese.png" alt="Português" />
+                <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/Portuguese.png" alt="Português" />
               </button>
             </div>
             <label htmlFor="username" className="sr-only">
