@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Header from "../components/Header";
 import "../styles/Security.css";
 
@@ -9,6 +11,11 @@ const Security = () => {
   const [selectedLanguage, setSelectedLanguage] = useState(
     localStorage.getItem("language") || "en"
   );
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   const translations = {
     en: {
@@ -20,6 +27,13 @@ const Security = () => {
       changeEmail: "Change Email",
       newEmail: "New Email",
       changeLanguage: "Change Language",
+      passwordMismatch: "New passwords do not match.",
+      passwordSameAsCurrent: "New password must be different from the current password.",
+      passwordSuccess: "Password updated successfully.",
+      passwordError: "An error occurred while updating the password.",
+      currentPasswordError: "Current password is incorrect.",
+      languageSuccess: "Language updated successfully.",
+      languageError: "Error updating language in backend.",
     },
     es: {
       pageTitle: "Configuración de Seguridad",
@@ -30,6 +44,13 @@ const Security = () => {
       changeEmail: "Cambiar Correo Electrónico",
       newEmail: "Nuevo Correo Electrónico",
       changeLanguage: "Cambiar Idioma",
+      passwordMismatch: "Las nuevas contraseñas no coinciden.",
+      passwordSameAsCurrent: "La nueva contraseña debe ser diferente de la actual.",
+      passwordSuccess: "Contraseña actualizada con éxito.",
+      passwordError: "Ocurrió un error al actualizar la contraseña.",
+      currentPasswordError: "La contraseña actual es incorrecta.",
+      languageSuccess: "Idioma actualizado con éxito.",
+      languageError: "Error al actualizar el idioma en el backend.",
     },
     pt: {
       pageTitle: "Configuração de Segurança",
@@ -40,6 +61,13 @@ const Security = () => {
       changeEmail: "Alterar Email",
       newEmail: "Novo Email",
       changeLanguage: "Alterar Idioma",
+      passwordMismatch: "As novas palavras-passe não coincidem.",
+      passwordSameAsCurrent: "A nova palavra-passe deve ser diferente da atual.",
+      passwordSuccess: "Palavra-passe atualizada com sucesso.",
+      passwordError: "Ocorreu um erro ao atualizar a palavra-passe.",
+      currentPasswordError: "A palavra-passe atual está incorreta.",
+      languageSuccess: "Idioma atualizado com sucesso.",
+      languageError: "Erro ao atualizar o idioma no backend.",
     },
   };
 
@@ -51,11 +79,9 @@ const Security = () => {
 
   const handleLanguageChange = async (lang) => {
     try {
-      // Cambia el idioma en el estado local y en localStorage
       setSelectedLanguage(lang);
       localStorage.setItem("language", lang);
 
-      // Realiza la solicitud al backend para actualizar el idioma del perfil
       const response = await fetch(
         `${API_BASE_URL}/api/profiles/${localStorage.getItem("user_id")}/`,
         {
@@ -69,15 +95,57 @@ const Security = () => {
       );
 
       if (!response.ok) {
-        console.error("Error al actualizar el idioma en el backend.");
+        toast.error(t.languageError);
       } else {
-        console.log("Idioma actualizado en el backend.");
+        toast.success(t.languageSuccess);
       }
 
-      // Refresca la página para aplicar el nuevo idioma
       window.location.reload();
     } catch (error) {
-      console.error("Error al actualizar el idioma:", error);
+      toast.error(t.languageError);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error(t.passwordMismatch);
+      return;
+    }
+
+    if (passwordData.newPassword === passwordData.currentPassword) {
+      toast.error(t.passwordSameAsCurrent);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/change-password/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access")}`,
+        },
+        body: JSON.stringify({
+          current_password: passwordData.currentPassword,
+          new_password: passwordData.newPassword,
+          confirm_password: passwordData.confirmPassword,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(t.passwordSuccess);
+        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      } else {
+        if (data.error === "Current password is incorrect.") {
+          toast.error(t.currentPasswordError);
+        } else {
+          toast.error(data.error || t.passwordError);
+        }
+      }
+    } catch (error) {
+      toast.error(t.passwordError);
     }
   };
 
@@ -97,21 +165,33 @@ const Security = () => {
             </button>
             {activeSection === "password" && (
               <div className="accordion-content">
-                <form>
+                <form onSubmit={handlePasswordChange}>
                   <input
                     type="password"
                     placeholder={t.currentPassword}
                     className="security-input"
+                    value={passwordData.currentPassword}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                    }
                   />
                   <input
                     type="password"
                     placeholder={t.newPassword}
                     className="security-input"
+                    value={passwordData.newPassword}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, newPassword: e.target.value })
+                    }
                   />
                   <input
                     type="password"
                     placeholder={t.confirmPassword}
                     className="security-input"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                    }
                   />
                   <button type="submit" className="security-submit-button">
                     {t.changePassword}
@@ -194,6 +274,7 @@ const Security = () => {
             )}
           </div>
         </div>
+        <ToastContainer />
       </div>
     </>
   );
