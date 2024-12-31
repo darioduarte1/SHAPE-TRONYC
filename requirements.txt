@@ -32,10 +32,13 @@ pylint-django==2.5.3
 pylint-plugin-utils==0.8.2
 pyOpenSSL==24.3.0
 python-decouple==3.8
+python-http-client==3.3.7
 requests==2.32.3
 rest-framework-simplejwt==0.0.2
+sendgrid==6.11.0
 six==1.17.0
 sqlparse==0.5.3
+starkbank-ecdsa==2.2.0
 tomlkit==0.13.2
 typing_extensions==4.12.2
 tzdata==2024.2
