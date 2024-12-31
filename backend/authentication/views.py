@@ -195,6 +195,8 @@ class GoogleLoginView(APIView):
 # Google Callback View
 User = get_user_model()
 
+# backend/authentication/views.py
+
 class GoogleCallbackView(APIView):
     permission_classes = [AllowAny]
 
@@ -228,27 +230,20 @@ class GoogleCallbackView(APIView):
 
         user_info = user_info_response.json()
 
-        # Get or create the user in the database
-        email = user_info.get("email")
-        if not email:
-            return Response({"error": "Google account does not have an email"}, status=400)
-
-        user, created = User.objects.get_or_create(email=email, defaults={
-            "username": user_info.get("id"),
-            "first_name": user_info.get("given_name"),
-            "last_name": user_info.get("family_name"),
-        })
-
-        # Generate tokens for the user
-        tokens = get_tokens_for_user(user)
-
-        return Response({
-            "message": "Authentication successful",
-            "user_info": {
-                "id": user.id,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
+        # Get or create a user
+        user, created = User.objects.get_or_create(
+            email=user_info["email"],
+            defaults={
+                "first_name": user_info.get("given_name", ""),
+                "last_name": user_info.get("family_name", ""),
             },
-            "tokens": tokens,
-        }, status=200)
+        )
+
+        # Generate JWT tokens
+        from .utils import get_tokens_for_user
+        jwt_tokens = get_tokens_for_user(user)
+
+        # Redirect to frontend with tokens
+        frontend_url = settings.FRONTEND_HOME_URL  # Set this in your Django settings
+        redirect_url = f"{frontend_url}?access_token={jwt_tokens['access']}&refresh_token={jwt_tokens['refresh']}"
+        return redirect(redirect_url)
