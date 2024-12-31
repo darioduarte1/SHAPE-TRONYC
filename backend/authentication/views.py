@@ -20,6 +20,7 @@ import requests
 from urllib.parse import urlencode
 from .services.google_auth import exchange_authorization_code_for_tokens, process_google_user
 from django.db import IntegrityError
+from .utils import get_tokens_for_user
 
 
 class RegisterView(APIView):
@@ -192,6 +193,8 @@ class GoogleLoginView(APIView):
         return redirect(f"{google_auth_url}?{query_string}")
 
 # Google Callback View
+User = get_user_model()
+
 class GoogleCallbackView(APIView):
     permission_classes = [AllowAny]
 
@@ -225,27 +228,27 @@ class GoogleCallbackView(APIView):
 
         user_info = user_info_response.json()
 
-        # Get the custom User model
-        User = get_user_model()
+        # Get or create the user in the database
+        email = user_info.get("email")
+        if not email:
+            return Response({"error": "Google account does not have an email"}, status=400)
 
-        try:
-            # Check if the user exists, otherwise create it
-            user, created = User.objects.get_or_create(
-                email=user_info['email'],
-                defaults={
-                    "first_name": user_info.get("given_name", ""),
-                    "last_name": user_info.get("family_name", ""),
-                    "is_active": True,
-                },
-            )
-            if created:
-                user.set_unusable_password()  # Prevents login with a password
-                user.save()
-        except IntegrityError:
-            return Response({"error": "User creation failed due to integrity issues"}, status=500)
+        user, created = User.objects.get_or_create(email=email, defaults={
+            "username": user_info.get("id"),
+            "first_name": user_info.get("given_name"),
+            "last_name": user_info.get("family_name"),
+        })
+
+        # Generate tokens for the user
+        tokens = get_tokens_for_user(user)
 
         return Response({
             "message": "Authentication successful",
-            "user_info": user_info,
+            "user_info": {
+                "id": user.id,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+            },
             "tokens": tokens,
         }, status=200)
