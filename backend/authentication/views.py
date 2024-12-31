@@ -18,6 +18,8 @@ from django.template.loader import render_to_string
 from .forms import UserRegistrationForm
 import requests
 from urllib.parse import urlencode
+from .services.google_auth import exchange_authorization_code_for_tokens, process_google_user
+from django.db import IntegrityError
 
 
 class RegisterView(APIView):
@@ -222,6 +224,25 @@ class GoogleCallbackView(APIView):
             return Response({"error": "Failed to fetch user info from Google"}, status=500)
 
         user_info = user_info_response.json()
+
+        # Get the custom User model
+        User = get_user_model()
+
+        try:
+            # Check if the user exists, otherwise create it
+            user, created = User.objects.get_or_create(
+                email=user_info['email'],
+                defaults={
+                    "first_name": user_info.get("given_name", ""),
+                    "last_name": user_info.get("family_name", ""),
+                    "is_active": True,
+                },
+            )
+            if created:
+                user.set_unusable_password()  # Prevents login with a password
+                user.save()
+        except IntegrityError:
+            return Response({"error": "User creation failed due to integrity issues"}, status=500)
 
         return Response({
             "message": "Authentication successful",
