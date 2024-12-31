@@ -379,17 +379,18 @@ div.signup-sign-in .forgot-password-button {
 
 .google-login-button {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #4285f4;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    cursor: pointer;
-    line-height: 1.5;
+    flex-direction: column; /* Organiza el contenido en columnas */
+    align-items: center; /* Centra los elementos */
+    text-align: center; /* Centra el texto */
+    white-space: normal; /* Permite que el texto se ajuste automáticamente */
+    line-height: 1.5; /* Ajusta el espacio entre las líneas */
+    font-size: 1rem; /* Ajusta el tamaño del texto */
+    padding: 10px; /* Ajusta el espacio interno */
+    max-width: 180px; /* Restringe el ancho máximo del botón */
+  }
+  
+  .google-login-button img {
+    margin-bottom: 5px; /* Añade espacio entre el logo y el texto */
   }
   
   .google-logo {
