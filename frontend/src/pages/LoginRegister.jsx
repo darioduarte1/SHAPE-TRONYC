@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/LoginRegister.css";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -8,7 +8,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
 const LoginRegister = () => {
   const [isActive, setIsActive] = useState(false);
   const [isPartner, setIsPartner] = useState(false);
-  const [language, setLanguage] = useState("en"); // Idioma inicial
+  const [language, setLanguage] = useState("en");
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -17,19 +17,22 @@ const LoginRegister = () => {
   });
   const navigate = useNavigate();
 
-  const handleLanguageChange = (lang) => {
-    setLanguage(lang);
-  };
-
   const translations = {
     en: {
+      emailVerificationPending:
+        "Your account is not yet verified. Check your email for the confirmation link. A new email has been sent.",
+      accountCreated: "Account created successfully. Please check your email to verify your account.",
+      passwordsMismatch: "Passwords do not match.",
+      invalidCredentials: "Invalid credentials.",
+      resendVerificationEmail: "Verification email resent successfully.",
+      errorOccured: "An error occurred. Please try again.",
       createAccount: "Create Account",
       username: "Username",
       email: "Email",
       password: "Password",
-      confirmPassword: "Password",
+      confirmPassword: "Confirm Password",
       signUp: "Sign Up",
-      logIn: "Log in",
+      logIn: "Log In",
       welcomeBack: "Welcome back!",
       enterLanguage: "Please select a language",
       enterDetails: "Please enter your details to log in",
@@ -38,11 +41,18 @@ const LoginRegister = () => {
       forgotPassword: "Forgot your password?",
     },
     es: {
+      emailVerificationPending:
+        "Tu cuenta no está verificada. Revisa tu correo electrónico para el enlace de confirmación. Se ha enviado un nuevo correo.",
+      accountCreated: "Cuenta creada exitosamente. Revisa tu correo para verificar tu cuenta.",
+      passwordsMismatch: "Las contraseñas no coinciden.",
+      invalidCredentials: "Credenciales inválidas.",
+      resendVerificationEmail: "Correo de verificación reenviado exitosamente.",
+      errorOccured: "Ocurrió un error. Por favor intenta nuevamente.",
       createAccount: "Crear Cuenta",
       username: "Usuario",
       email: "Correo Electrónico",
       password: "Contraseña",
-      confirmPassword: "Contraseña",
+      confirmPassword: "Confirmar Contraseña",
       signUp: "Registrarse",
       logIn: "Iniciar Sesión",
       welcomeBack: "¡Bienvenido de nuevo!",
@@ -53,11 +63,18 @@ const LoginRegister = () => {
       forgotPassword: "¿Olvidaste tu contraseña?",
     },
     pt: {
+      emailVerificationPending:
+        "Sua conta ainda não foi verificada. Verifique seu e-mail para o link de confirmação. Um novo e-mail foi enviado.",
+      accountCreated: "Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.",
+      passwordsMismatch: "As senhas não coincidem.",
+      invalidCredentials: "Credenciais inválidas.",
+      resendVerificationEmail: "E-mail de verificação reenviado com sucesso.",
+      errorOccured: "Ocorreu um erro. Por favor, tente novamente.",
       createAccount: "Criar Conta",
       username: "Utilizador",
       email: "Email",
       password: "Palavra-passe",
-      confirmPassword: "Palavra-passe",
+      confirmPassword: "Confirmar Palavra-passe",
       signUp: "Registar-se",
       logIn: "Iniciar Sessão",
       welcomeBack: "Bem-vindo de volta!",
@@ -69,9 +86,26 @@ const LoginRegister = () => {
     },
   };
 
+  const t = translations[language];
+
+  useEffect(() => {
+    // Manejar token de acceso en la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get("access_token");
+    if (accessToken) {
+      localStorage.setItem("access_token", accessToken);
+      toast.success("Google login successful!");
+      navigate("/home");
+    }
+  }, [navigate]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleLanguageChange = (lang) => {
+    setLanguage(lang);
   };
 
   const handleRegisterClick = () => setIsActive(true);
@@ -80,52 +114,14 @@ const LoginRegister = () => {
 
   const handleToggleChange = () => setIsPartner(!isPartner);
 
-  const login = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("access", data.access);
-        localStorage.setItem("refresh", data.refresh);
-        if (data.user_id) {
-          localStorage.setItem("user_id", data.user_id);
-        } else {
-          console.error("El user_id no fue proporcionado por el servidor.");
-          toast.error("Error al iniciar sesión: falta el user_id.");
-          return;
-        }
-        if (data.language) {
-          localStorage.setItem("language", data.language);
-        } else {
-          console.error("El idioma no fue proporcionado por el servidor.");
-          toast.error("Error al iniciar sesión: falta el idioma del usuario.");
-        }
-        navigate("/home");
-      } else {
-        const errorData = await response.json();
-        toast.error(
-          `Error al iniciar sesión: ${errorData.error || "Credenciales inválidas."}`
-        );
-      }
-    } catch (err) {
-      console.error("Error al iniciar sesión", err);
-      toast.error("Error al iniciar sesión. Por favor intenta nuevamente.");
-    }
-  };
-
   const signup = async () => {
+    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
+      toast.error("All fields are required.");
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Las contraseñas no coinciden.");
+      toast.error(t.passwordsMismatch);
       return;
     }
 
@@ -141,33 +137,92 @@ const LoginRegister = () => {
           password: formData.password,
           confirm_password: formData.confirmPassword,
           is_partner: isPartner,
-          language: language, // Se agrega el idioma seleccionado
+          language,
         }),
       });
 
       if (response.ok) {
-        toast.success("Registro exitoso. Ahora puedes iniciar sesión.");
+        toast.success(t.accountCreated);
         setIsActive(false);
       } else {
         const errorData = await response.json();
-        toast.error(`Error al registrarse: ${JSON.stringify(errorData)}`);
+        toast.error(errorData.error || t.errorOccured);
       }
-    } catch (err) {
-      console.error("Error al registrarse", err);
-      toast.error("Error al registrarse. Por favor, intenta nuevamente.");
+    } catch (error) {
+      console.error("Registration error", error);
+      toast.error(t.errorOccured);
     }
+  };
+
+  const login = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("access", data.access);
+        localStorage.setItem("refresh", data.refresh);
+        if (data.user_id) {
+          localStorage.setItem("user_id", data.user_id);
+        }
+        if (data.language) {
+          localStorage.setItem("language", data.language);
+        }
+        navigate("/home");
+      } else if (data.error === "Email not verified") {
+        toast.warning(t.emailVerificationPending);
+        await resendVerificationEmail(formData.email);
+      } else {
+        toast.error(t.invalidCredentials);
+      }
+    } catch (error) {
+      console.error("Login error", error);
+      toast.error(t.errorOccured);
+    }
+  };
+
+  const resendVerificationEmail = async (email) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/resend-verification/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        toast.success(t.resendVerificationEmail);
+      } else {
+        toast.error(t.errorOccured);
+      }
+    } catch (error) {
+      console.error("Resend verification error", error);
+      toast.error(t.errorOccured);
+    }
+  };
+
+  const googleLogin = () => {
+    const googleLoginUrl = "https://127.0.0.1:8000/auth/oauth2/login/google/";
+    window.location.href = googleLoginUrl;
   };
 
   return (
     <div className="signup-body">
-      <div
-        className={`signup-container ${isActive ? "signup-active" : ""}`}
-        id="container"
-      >
+      <div className={`signup-container ${isActive ? "signup-active" : ""}`} id="container">
         <div className="signup-form-container signup-sign-up">
           <div className="form">
-            <h1 className="centered-title">{translations[language].createAccount}</h1>
-            {/* Botones de cambio de idioma */}
+            <h1 className="centered-title">{t.createAccount}</h1>
             <div className="unique-language-buttons">
               <button onClick={() => handleLanguageChange("en")} aria-label="English">
                 <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/English.png" alt="English" />
@@ -179,50 +234,34 @@ const LoginRegister = () => {
                 <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/Portuguese.png" alt="Português" />
               </button>
             </div>
-            <label htmlFor="username" className="sr-only">
-              {translations[language].username}
-            </label>
             <input
               type="text"
-              id="username"
               name="username"
-              placeholder={translations[language].username}
+              placeholder={t.username}
               value={formData.username}
               onChange={handleInputChange}
               autoComplete="username"
             />
-            <label htmlFor="email" className="sr-only">
-              {translations[language].email}
-            </label>
             <input
               type="email"
-              id="email"
               name="email"
-              placeholder={translations[language].email}
+              placeholder={t.email}
               value={formData.email}
               onChange={handleInputChange}
               autoComplete="email"
             />
-            <label htmlFor="password" className="sr-only">
-              {translations[language].password}
-            </label>
             <input
               type="password"
-              id="password"
               name="password"
-              placeholder={translations[language].password}
+              placeholder={t.password}
               value={formData.password}
               onChange={handleInputChange}
               autoComplete="new-password"
             />
-            <label htmlFor="confirmPassword" className="sr-only">
-              {translations[language].confirmPassword}
-            </label>
             <input
               type="password"
-              id="confirmPassword"
               name="confirmPassword"
-              placeholder={translations[language].confirmPassword}
+              placeholder={t.confirmPassword}
               value={formData.confirmPassword}
               onChange={handleInputChange}
               autoComplete="new-password"
@@ -243,43 +282,43 @@ const LoginRegister = () => {
                   {isPartner ? "Staff" : "User"}
                 </span>
               </div>
-              <button onClick={signup}>{translations[language].signUp}</button>
+              <button onClick={signup}>{t.signUp}</button>
+              <button className="google-login-button" onClick={googleLogin}>
+                <img
+                  src="https://developers.google.com/identity/images/g-logo.png"
+                  alt="Google Logo"
+                  className="google-logo"
+                />
+                Sign in with Google
+              </button>;
             </div>
           </div>
         </div>
 
         <div className="signup-form-container signup-sign-in">
           <div className="form">
-            <h1 id="login-title">{translations[language].logIn}</h1>
-            <label htmlFor="loginUsername" className="sr-only">
-              {translations[language].username}
-            </label>
+            <h1 id="login-title">{t.logIn}</h1>
             <input
               type="text"
-              id="loginUsername"
               name="username"
-              placeholder={translations[language].username}
+              placeholder={t.username}
               value={formData.username}
               onChange={handleInputChange}
             />
-            <label htmlFor="loginPassword" className="sr-only">
-              {translations[language].password}
-            </label>
             <input
               type="password"
-              id="loginPassword"
               name="password"
-              placeholder={translations[language].password}
+              placeholder={t.password}
               value={formData.password}
               onChange={handleInputChange}
             />
-            <button onClick={login}>{translations[language].logIn}</button>
+            <button onClick={login}>{t.logIn}</button>
             <button
               onClick={() => toast.info("Función no implementada.")}
               className="forgot-password-button"
             >
-              <span>{translations[language].forgotPassword.split(" ")[0]}</span>
-              <span>{translations[language].forgotPassword.split(" ").slice(1).join(" ")}</span>
+              <span>{t.forgotPassword.split(" ")[0]}</span>
+              <span>{t.forgotPassword.split(" ").slice(1).join(" ")}</span>
             </button>
           </div>
         </div>
@@ -287,36 +326,18 @@ const LoginRegister = () => {
         <div className="signup-toggle-container">
           <div className="signup-toggle">
             <div className="signup-toggle-panel signup-toggle-left">
-              <h1 className={language === 'pt' ? 'portuguese-title' : 'default-title'}>
-                {language === 'pt' ? (
-                  <>
-                    <span>Bem-vindo</span>
-                    <br />
-                    <span>de volta</span>
-                  </>
-                ) : (
-                  translations[language].welcomeBack
-                )}
-              </h1>
-              <p>{translations[language].enterLanguage}</p>
-              <p>{translations[language].enterDetails}</p>
-              <button
-                className="signup-hidden"
-                id="login"
-                onClick={handleLoginClick}
-              >
-                {translations[language].logIn}
+              <h1>{t.welcomeBack}</h1>
+              <p>{t.enterLanguage}</p>
+              <p>{t.enterDetails}</p>
+              <button id="login" onClick={handleLoginClick}>
+                {t.logIn}
               </button>
             </div>
             <div className="signup-toggle-panel signup-toggle-right">
-              <h1>{translations[language].hiFriend}</h1>
-              <p>{translations[language].registerData}</p>
-              <button
-                className="signup-hidden"
-                id="register"
-                onClick={handleRegisterClick}
-              >
-                {translations[language].signUp}
+              <h1>{t.hiFriend}</h1>
+              <p>{t.registerData}</p>
+              <button id="register" onClick={handleRegisterClick}>
+                {t.signUp}
               </button>
             </div>
           </div>
