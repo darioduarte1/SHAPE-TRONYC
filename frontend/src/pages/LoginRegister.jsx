@@ -19,7 +19,7 @@ const LoginRegister = () => {
 
   const translations = {
     en: {
-      googleLogin: "Sign in\nwith Google",
+      googleLogin: "Sign Up\nwith Google",
       emailVerificationPending:
         "Your account is not yet verified. Check your email for the confirmation link. A new email has been sent.",
       accountCreated: "Account created successfully. Please check your email to verify your account.",
@@ -42,7 +42,7 @@ const LoginRegister = () => {
       forgotPassword: "Forgot your password?",
     },
     es: {
-      googleLogin: "Iniciar sesión\ncon Google",
+      googleLogin: "Regístrate\ncon Google",
       emailVerificationPending:
         "Tu cuenta no está verificada. Revisa tu correo electrónico para el enlace de confirmación. Se ha enviado un nuevo correo.",
       accountCreated: "Cuenta creada exitosamente. Revisa tu correo para verificar tu cuenta.",
@@ -65,7 +65,7 @@ const LoginRegister = () => {
       forgotPassword: "¿Olvidaste tu contraseña?",
     },
     pt: {
-      googleLogin: "Entrar\ncom o Google",
+      googleLogin: "Regista-te\ncom o Google",
       emailVerificationPending:
         "Sua conta ainda não foi verificada. Verifique seu e-mail para o link de confirmação. Um novo e-mail foi enviado.",
       accountCreated: "Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.",
