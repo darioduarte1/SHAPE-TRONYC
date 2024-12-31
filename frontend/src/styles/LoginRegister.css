@@ -381,21 +381,25 @@ div.signup-sign-in .forgot-password-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 15px;
-    margin-top: 10px;
-    background-color: #4285F4;
+    background-color: #4285f4;
     color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
     font-size: 16px;
     font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    line-height: 1.5;
   }
   
   .google-logo {
-    width: 20px;
     height: 20px;
     margin-right: 10px;
+  }
+  
+  .google-login-text {
+    white-space: pre-line; /* Permite dividir en múltiples líneas */
+    text-align: center;
   }
 
   /* ############################# */
