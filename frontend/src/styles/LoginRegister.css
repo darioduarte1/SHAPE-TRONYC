@@ -506,7 +506,7 @@ div.signup-sign-in .forgot-password-button {
     width: 200px;
     font-size: 32px;
     margin-bottom: 0px;
-    margin-top: 99px;
+    margin-top: 103px;
 }
 
 .signup-toggle-panel.signup-toggle-left #enterLanguage {
@@ -519,12 +519,18 @@ div.signup-sign-in .forgot-password-button {
     margin-bottom: 40px;
 }
 
+.signup-toggle-panel.signup-toggle-left #register {
+    margin-bottom: 57px;
+}
+
 .signup-toggle-panel.signup-toggle-left #login {
     margin-top: 7px;
     padding-left: 10px;
     padding-right: 10px;
     margin-bottom: 170px;
 }
+
+
 
 /* #############################
 ####### Painel Hi Friend #######
@@ -533,6 +539,7 @@ div.signup-sign-in .forgot-password-button {
 .signup-toggle-panel.signup-toggle-right h1 {
     margin-bottom: 30px;
     margin-top: 10px;
+    font-size: 32px;
 }
 
 .signup-toggle-panel.signup-toggle-right p {

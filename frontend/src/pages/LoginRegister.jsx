@@ -331,14 +331,26 @@ const LoginRegister = () => {
                   <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/Portuguese.png" alt="Português" />
                 </button>
               </div>
-              <p id="enterDetails">{t.enterDetails}</p>
+              <p id="register">{t.registerData}</p>
               <button id="login" onClick={handleLoginClick}>
                 {t.logIn}
               </button>
             </div>
             <div className="signup-toggle-panel signup-toggle-right">
               <h1>{t.hiFriend}</h1>
-              <p>{t.registerData}</p>
+              <p id="enterLanguage" >{t.enterLanguage}</p>
+              <div className="unique-language-buttons">
+                <button onClick={() => handleLanguageChange("en")} aria-label="English">
+                  <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/English.png" alt="English" />
+                </button>
+                <button onClick={() => handleLanguageChange("es")} aria-label="Español">
+                  <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/Spanish.png" alt="Español" />
+                </button>
+                <button onClick={() => handleLanguageChange("pt")} aria-label="Português">
+                  <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/Portuguese.png" alt="Português" />
+                </button>
+              </div>
+              <p id="enterDetails">{t.enterDetails}</p>
               <button id="register" onClick={handleRegisterClick}>
                 {t.signUp}
               </button>
