@@ -82,6 +82,7 @@ div.signup-toggle-panel.signup-toggle-left h1.portuguese-title span {
     font-size: 12px;
     padding: 10px 45px;
     border: 1px solid transparent;
+    border-radius: 8px;
     font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -372,35 +373,174 @@ div.signup-sign-in .forgot-password-button {
     object-fit: cover;
 }
 
+/* #############################
+######### Botón Log In #########
+############################# */
+
+.signup-container button.log-in-button {
+    display: flex !important; /* Flexbox para organizar el contenido */
+    justify-content: center !important; /* Centrado horizontal del contenido */
+    align-items: center !important; /* Centrado vertical del contenido */
+    text-align: center !important;
+    width: 220px !important; /* Ancho fijo */
+    height: 60px !important; /* Altura fija */
+    border-radius: 8px !important; /* Bordes redondeados */
+    background-color: #1d0e3f !important; /* Color de fondo */
+    color: #fff !important; /* Texto blanco */
+    font-size: 12px !important; /* Tamaño del texto */
+    font-weight: 600 !important; /* Peso del texto */
+    text-transform: uppercase !important; /* Texto en mayúsculas */
+    letter-spacing: 0.5px !important; /* Espaciado entre letras */
+    border: none !important; /* Sin borde */
+    cursor: pointer !important; /* Cursor en forma de mano */
+    padding: 0 10px !important; /* Espaciado interno ajustado */
+    overflow: hidden !important; /* Oculta contenido desbordado */
+    white-space: nowrap !important; /* Impide saltos de línea */
+    text-overflow: ellipsis !important; /* Añade puntos suspensivos si el texto es muy largo */
+    box-sizing: border-box !important; /* Incluye padding y borde en el tamaño */
+    transition: transform 0.2s ease !important; /* Transición suave */
+}
+
+/* Efecto hover */
+.signup-container button.log-in-button:hover {
+    transform: scale(1.05) !important; /* Efecto hover */
+}
+
+/* Efecto active */
+.signup-container button.log-in-button:active {
+    transform: scale(0.95) !important; /* Efecto al hacer clic */
+}
+
+/* #############################
+######## Boton Sign up #########
+############################# */
+
+.signup-container button.sign-up-button {
+    display: flex !important; /* Flexbox para organizar el contenido */
+    justify-content: center !important; /* Centrado horizontal del contenido */
+    align-items: center !important; /* Centrado vertical del contenido */
+    text-align: center !important;
+    width: 220px !important; /* Ancho fijo */
+    height: 60px !important; /* Altura fija */
+    border-radius: 8px !important; /* Bordes redondeados */
+    background-color: #1d0e3f !important; /* Color de fondo */
+    color: #fff !important; /* Texto blanco */
+    font-size: 12px !important; /* Tamaño del texto */
+    font-weight: 600 !important; /* Peso del texto */
+    text-transform: uppercase !important; /* Texto en mayúsculas */
+    letter-spacing: 0.5px !important; /* Espaciado entre letras */
+    border: none !important; /* Sin borde */
+    cursor: pointer !important; /* Cursor en forma de mano */
+    padding: 0 10px !important; /* Espaciado interno ajustado */
+    overflow: hidden !important; /* Oculta contenido desbordado */
+    white-space: nowrap !important; /* Impide saltos de línea */
+    text-overflow: ellipsis !important; /* Añade puntos suspensivos si el texto es muy largo */
+    box-sizing: border-box !important; /* Incluye padding y borde en el tamaño */
+    transition: transform 0.2s ease !important; /* Transición suave */
+}
+
+  /* Efecto hover */
+.signup-container button.sign-up-button:hover {
+    transform: scale(1.05) !important; /* Efecto hover */
+}
+
+  /* Efecto active */
+.signup-container button.sign-up-button:active {
+    transform: scale(0.95) !important; /* Efecto al hacer clic */
+}
+
 
 /* #############################
 ##### Estilos botao Google #####
 ############################# */
 
+/* Estilo del botón de Google con máxima prioridad */
 .google-login-button {
-    display: flex;
-    flex-direction: column; /* Organiza el contenido en columnas */
-    align-items: center; /* Centra los elementos */
-    text-align: center; /* Centra el texto */
-    white-space: normal; /* Permite que el texto se ajuste automáticamente */
-    line-height: 1.5; /* Ajusta el espacio entre las líneas */
-    font-size: 1rem; /* Ajusta el tamaño del texto */
-    padding: 10px; /* Ajusta el espacio interno */
-    max-width: 180px; /* Restringe el ancho máximo del botón */
-  }
-  
-  .google-login-button img {
-    margin-bottom: 5px; /* Añade espacio entre el logo y el texto */
-  }
-  
-  .google-logo {
-    height: 20px;
-    margin-right: 10px;
-  }
-  
-  .google-login-text {
-    white-space: pre-line; /* Permite dividir en múltiples líneas */
-    text-align: center;
-  }
+    display: flex !important; /* Usamos flexbox para la organización */
+    flex-direction: row !important; /* Organización en fila */
+    align-items: center !important; /* Alineación vertical centrada */
+    justify-content: center !important; /* Alineación horizontal centrada */
+    text-align: center !important;
+    width: calc(220px - 14px) !important; /* Reducimos 20px a cada lado (40px total) */
+    height: 60px !important; /* Altura fija */
+    padding: 10px 20px !important; /* Espaciado interno ajustado */
+    border-radius: 8px !important; /* Bordes redondeados */
+    background-color: #1d0e3f !important; /* Fondo azul */
+    color: #fff !important; /* Texto blanco */
+    border: none !important; /* Sin borde */
+    cursor: pointer !important; /* Cursor en forma de mano */
+    transition: transform 0.2s ease !important; /* Transición suave */
+}
+
+.google-login-button img {
+    width: 40px !important; /* Tamaño del logo */
+    height: 40px !important; /* Tamaño del logo */
+    margin-right: 10px !important; /* Espacio entre el logo y el texto */
+}
+
+.google-login-button span {
+    white-space: normal !important; /* Permite saltos de línea */
+    line-height: 1.2 !important; /* Espaciado entre líneas */
+    font-size: 0.9rem !important; /* Tamaño del texto */
+    max-width: 120px !important; /* Ancho máximo para el texto */
+    overflow-wrap: break-word !important; /* Permite dividir palabras largas */
+    word-break: break-word !important; /* Compatibilidad adicional */
+    text-align: center !important; /* Alineación del texto al centro */
+}
+
+  /* Efecto hover */
+.google-login-button:hover {
+    transform: scale(1.05) !important; /* Efecto hover */
+}
+
+  /* Efecto active */
+.google-login-button:active {
+    transform: scale(0.95) !important; /* Efecto al hacer clic */
+}
+
+/* #############################
+###### Painel Welcome Back #####
+############################# */
+
+.signup-toggle-panel.signup-toggle-left h1{
+    width: 200px;
+    margin-bottom: 60px;
+    margin-top: 100px;
+    font-size: 32px;
+}
+
+.signup-toggle-panel.signup-toggle-left #enterLanguage {
+    margin-top: 40px;
+    margin-bottom: 0px;
+}
+
+.signup-toggle-panel.signup-toggle-left #enterDetails {
+    height: 60px;
+    margin-bottom: 90px;
+}
+
+.signup-toggle-panel.signup-toggle-left #login {
+    margin-top: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 170px;
+}
+
+/* #############################
+####### Painel Hi Friend #######
+############################# */
+
+.signup-toggle-panel.signup-toggle-right h1 {
+    margin-bottom: 30px;
+    margin-top: 10px;
+}
+
+.signup-toggle-panel.signup-toggle-right p {
+    margin-top: 30px;
+}
+
+.signup-toggle-panel.signup-toggle-right #register {
+    margin-bottom: 55px;
+}
 
   /* ############################# */

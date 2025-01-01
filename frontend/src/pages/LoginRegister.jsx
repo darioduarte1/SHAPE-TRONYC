@@ -65,7 +65,7 @@ const LoginRegister = () => {
       forgotPassword: "¿Olvidaste tu contraseña?",
     },
     pt: {
-      googleLogin: "Regista-te\ncom o Google",
+      googleLogin: "Regista-te\ncom Google",
       emailVerificationPending:
         "Sua conta ainda não foi verificada. Verifique seu e-mail para o link de confirmação. Um novo e-mail foi enviado.",
       accountCreated: "Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.",
@@ -330,8 +330,8 @@ const LoginRegister = () => {
           <div className="signup-toggle">
             <div className="signup-toggle-panel signup-toggle-left">
               <h1>{t.welcomeBack}</h1>
-              <p>{t.enterLanguage}</p>
-              <p>{t.enterDetails}</p>
+              <p id="enterLanguage" >{t.enterLanguage}</p>
+              <p id="enterDetails">{t.enterDetails}</p>
               <button id="login" onClick={handleLoginClick}>
                 {t.logIn}
               </button>
