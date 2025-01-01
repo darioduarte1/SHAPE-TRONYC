@@ -504,19 +504,19 @@ div.signup-sign-in .forgot-password-button {
 
 .signup-toggle-panel.signup-toggle-left h1{
     width: 200px;
-    margin-bottom: 60px;
-    margin-top: 100px;
     font-size: 32px;
+    margin-bottom: 0px;
+    margin-top: 99px;
 }
 
 .signup-toggle-panel.signup-toggle-left #enterLanguage {
-    margin-top: 40px;
-    margin-bottom: 0px;
+    margin-top: 70px;
+    margin-bottom: 20px;
 }
 
 .signup-toggle-panel.signup-toggle-left #enterDetails {
     height: 60px;
-    margin-bottom: 90px;
+    margin-bottom: 40px;
 }
 
 .signup-toggle-panel.signup-toggle-left #login {
