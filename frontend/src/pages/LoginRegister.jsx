@@ -226,17 +226,6 @@ const LoginRegister = () => {
         <div className="signup-form-container signup-sign-up">
           <div className="form">
             <h1 className="centered-title">{t.createAccount}</h1>
-            <div className="unique-language-buttons">
-              <button onClick={() => handleLanguageChange("en")} aria-label="English">
-                <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/English.png" alt="English" />
-              </button>
-              <button onClick={() => handleLanguageChange("es")} aria-label="Español">
-                <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/Spanish.png" alt="Español" />
-              </button>
-              <button onClick={() => handleLanguageChange("pt")} aria-label="Português">
-                <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/Portuguese.png" alt="Português" />
-              </button>
-            </div>
             <input
               type="text"
               name="username"
@@ -331,6 +320,17 @@ const LoginRegister = () => {
             <div className="signup-toggle-panel signup-toggle-left">
               <h1>{t.welcomeBack}</h1>
               <p id="enterLanguage" >{t.enterLanguage}</p>
+              <div className="unique-language-buttons">
+                <button onClick={() => handleLanguageChange("en")} aria-label="English">
+                  <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/English.png" alt="English" />
+                </button>
+                <button onClick={() => handleLanguageChange("es")} aria-label="Español">
+                  <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/Spanish.png" alt="Español" />
+                </button>
+                <button onClick={() => handleLanguageChange("pt")} aria-label="Português">
+                  <img src="https://res.cloudinary.com/deizebh0z/image/upload/v1735434595/pictures_backend/flags_register/Portuguese.png" alt="Português" />
+                </button>
+              </div>
               <p id="enterDetails">{t.enterDetails}</p>
               <button id="login" onClick={handleLoginClick}>
                 {t.logIn}
