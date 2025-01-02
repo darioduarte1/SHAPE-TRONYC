@@ -307,7 +307,6 @@ input::placeholder {
 /* #########################################################################
 ############################## ABA LOG IN ##################################
 ######################################################################### */
-
 /* -----------------------------
 ---------- Login Title ---------
 ----------------------------- */
@@ -483,3 +482,58 @@ div.signup-sign-in .forgot-password-button {
 #signUpButton{
     width: 180px;
 }
+
+/* #########################################################################
+############################### POP UP REENVIO EMAIL #######################
+######################################################################### */
+.popup-overlay {
+    position: fixed; /* Fijo respecto a la ventana del navegador */
+    top: 50%; /* Centrado verticalmente */
+    left: 50%; /* Centrado horizontalmente */
+    transform: translate(-50%, -50%); /* Ajusta el punto de referencia al centro */
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1000; /* Asegura que esté sobre otros elementos */
+    left: 108px;
+    height: 150px;
+    top: 750px;
+    width: 180px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+
+}
+
+.popup-overlay .close-button {
+    position: absolute; /* Posiciona el botón dentro del popup */
+    top: 10px; /* Distancia desde el borde superior del popup */
+    right: 10px; /* Distancia desde el borde derecho del popup */
+    cursor: pointer;
+}
+#popupMessage{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 8px;
+    line-height: 10px;
+}
+#popupButtonMail{
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: blue;color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 150px;
+    font-size: 7px;
+}   
+#popupButtonClose{
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: red;
+    color: white; border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 150px;
+    font-size: 7px;
+}   

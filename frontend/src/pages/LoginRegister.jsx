@@ -5,25 +5,6 @@ import { toast } from "react-toastify";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
-// Componente reutilizable para los botones de Google
-const GoogleAuthButton = ({ mode, onClick, translations }) => {
-  return (
-    <button id="googleLoginButton" className="google-login-button" onClick={onClick}>
-      <img
-        src="https://developers.google.com/identity/images/g-logo.png"
-        alt="Google Logo"
-        className="google-logo"
-      />
-      <span className="google-login-text">
-        {mode === "signup"
-          // Texto para registro
-          ? translations.googleRegister
-          // Texto para login
-          : translations.googleLogin}
-      </span>
-    </button>
-  );
-};
 
 const LoginRegister = () => {
   const [isActive, setIsActive] = useState(false);
@@ -37,16 +18,19 @@ const LoginRegister = () => {
   });
   const navigate = useNavigate();
 
+  /**********************************************************************************************************************************
+  ****************************************************** TRADUCOES ******************************************************************
+  **********************************************************************************************************************************/
   const translations = {
     en: {
       googleRegister: "Sign Up\nwith Google",
       googleLogin: "Log In\nwith Google",
       emailVerificationPending:
-        "Your account is not yet verified. Check your email for the confirmation link. A new email has been sent.",
+        "Your account has not been verified. Please check your inbox and spam folder! Activate the link sent!",
       accountCreated: "Account created successfully. Please check your email to verify your account.",
       passwordsMismatch: "Passwords do not match.",
       invalidCredentials: "Invalid credentials.",
-      resendVerificationEmail: "Verification email resent successfully.",
+      resendVerificationEmail: "Resend confirmation email",
       errorOccured: "An error occurred. Please try again.",
       createAccount: "Create Account",
       username: "Username",
@@ -66,11 +50,11 @@ const LoginRegister = () => {
       googleRegister: "Regístrate\ncon Google",
       googleLogin: "Inicia sesión\ncon Google",
       emailVerificationPending:
-        "Tu cuenta no está verificada. Revisa tu correo electrónico para el enlace de confirmación. Se ha enviado un nuevo correo.",
+        "Tu cuenta no ha sido verificada. Por favor revisa tu bandeja de entrada y spam! Activa el enlace enviado!",
       accountCreated: "Cuenta creada exitosamente. Revisa tu correo para verificar tu cuenta.",
       passwordsMismatch: "Las contraseñas no coinciden.",
       invalidCredentials: "Credenciales inválidas.",
-      resendVerificationEmail: "Correo de verificación reenviado exitosamente.",
+      resendVerificationEmail: "Reenviar correo de confirmación",
       errorOccured: "Ocurrió un error. Por favor intenta nuevamente.",
       createAccount: "Crear Cuenta",
       username: "Usuario",
@@ -90,11 +74,11 @@ const LoginRegister = () => {
       googleRegister: "Regista-te\ncom Google",
       googleLogin: "Inicia sessão\ncom Google",
       emailVerificationPending:
-        "Sua conta ainda não foi verificada. Verifique seu e-mail para o link de confirmação. Um novo e-mail foi enviado.",
+        "A sua conta ainda não foi verificada. Por favor verifique a caixa de entrada e o spam! Active o link enviado!",
       accountCreated: "Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.",
       passwordsMismatch: "As senhas não coincidem.",
       invalidCredentials: "Credenciais inválidas.",
-      resendVerificationEmail: "E-mail de verificação reenviado com sucesso.",
+      resendVerificationEmail: "Reenviar email de confirmação",
       errorOccured: "Ocorreu um erro. Por favor, tente novamente.",
       createAccount: "Criar Conta",
       username: "Utilizador",
@@ -139,17 +123,21 @@ const LoginRegister = () => {
 
   const handleToggleChange = () => setIsPartner(!isPartner);
 
+
+  /********************************************************************************************************************************
+  ******************************************************** SIGN UP ****************************************************************
+  ********************************************************************************************************************************/
   const signup = async () => {
     if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
       toast.error(t.errorOccured);
       return;
     }
-  
+
     if (formData.password !== formData.confirmPassword) {
       toast.error(t.passwordsMismatch);
       return;
     }
-  
+
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register/`, {
         method: "POST",
@@ -164,7 +152,7 @@ const LoginRegister = () => {
           language, // Asegúrate de que este valor se envíe
         }),
       });
-  
+
       if (response.ok) {
         toast.success(t.accountCreated, { autoClose: 10000 }); // Duración ajustada a 10 segundos
         setIsActive(false);
@@ -185,73 +173,147 @@ const LoginRegister = () => {
     }
   };
 
+  /**********************************************************************************************************************************
+  ******************************************* COOLDOWN DEL BUTTON DE REENVIAR EMAIL *************************************************
+  **********************************************************************************************************************************/
+  // Estado inicial para manejar cooldown
+  const [resendCooldown, setResendCooldown] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [showPopup, setShowPopup] = useState(false); // Controla la visibilidad del popup
+  const [popupMessage, setPopupMessage] = useState(""); // Contiene el mensaje del popup
+
+  // Función para manejar cooldown
+  const startCooldown = (duration) => {
+    setResendCooldown(true); // Activar cooldown
+    setSecondsLeft(duration); // Configurar duración inicial del temporizador
+
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval); // Detener el temporizador
+          setResendCooldown(false); // Desactivar cooldown
+          return 0; // Reiniciar segundos restantes
+        }
+        return prev - 1; // Decrementar contador
+      });
+    }, 1000);
+  };
+
+  /**********************************************************************************************************************************
+  *********************************************** REENVIO DE EMAIL CONFIRMACION *****************************************************
+  **********************************************************************************************************************************/
+  // Función para reenviar el correo de verificación
+  const resendVerificationEmail = async (email) => {
+    if (resendCooldown) {
+      console.warn("Intento bloqueado: cooldown activo.");
+      return; // Bloquear nuevas solicitudes si el cooldown está activo
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/resend-verification/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        toast.success("Email de verificação reenviado com sucesso.");
+        startCooldown(60); // Activar cooldown por 60 segundos
+      } else if (response.status === 429) {
+        toast.error("Demasiados intentos. Por favor, espera un momento.");
+      } else {
+        toast.error("Error al reenviar el correo. Por favor, inténtalo de nuevo.");
+      }
+    } catch (error) {
+      console.error("Error al reenviar el correo:", error);
+      toast.error("Ocurrió un error. Inténtalo nuevamente.");
+    }
+  };
+
+  /**********************************************************************************************************************************
+  ********************************************************** LOGIN ******************************************************************
+  **********************************************************************************************************************************/
   const login = async () => {
+    console.log("Datos enviados para login:", formData);
+
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: formData.username, password: formData.password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
+        console.log("Login exitoso:", data);
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
-        if (data.user_id) {
-          localStorage.setItem("user_id", data.user_id);
-        }
-        if (data.language) {
-          localStorage.setItem("language", data.language);
-        }
+        if (data.user_id) localStorage.setItem("user_id", data.user_id);
         navigate("/home");
-      } else if (data.error === "Email not verified") {
-        toast.warning(t.emailVerificationPending);
+      } else if (response.status === 403) {
+        console.error("Usuario inactivo:", data);
+        const userLanguage = data.language || "en";
+        setPopupMessage(
+          translations[userLanguage]?.emailVerificationPending ||
+          "Sua conta não foi verificada! Por favor, verifique seu email."
+        );
+        setShowPopup(true);
       } else {
-        toast.error(t.invalidCredentials);
+        console.error("Credenciales inválidas:", data);
+        toast.error(data.error || translations[language]?.invalidCredentials || "Credenciais inválidas.");
       }
     } catch (error) {
-      console.error("Login error", error);
-      toast.error(t.errorOccured);
+      console.error("Error en el login:", error);
+      toast.error(translations[language]?.errorOccured || "Ocorreu um erro.");
     }
   };
 
-  // const resendVerificationEmail = async (email) => {
-  //   try {
-  //     const response = await fetch(`${API_BASE_URL}/auth/resend-verification/`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ email }),
-  //     });
 
-  //     if (response.ok) {
-  //       toast.success(t.resendVerificationEmail);
-  //     } else {
-  //       toast.error(t.errorOccured);
-  //     }
-  //   } catch (error) {
-  //     console.error("Resend verification error", error);
-  //     toast.error(t.errorOccured);
-  //   }
-  // };
 
+
+  /**********************************************************************************************************************************
+  *************************************************** BOTAO GOOGLE REUTILIZAVEL *****************************************************
+  **********************************************************************************************************************************/
+  // Componente reutilizable para los botones de Google
+  const GoogleAuthButton = ({ mode, onClick, translations }) => {
+    return (
+      <button id="googleLoginButton" className="google-login-button" onClick={onClick}>
+        <img
+          src="https://developers.google.com/identity/images/g-logo.png"
+          alt="Google Logo"
+          className="google-logo"
+        />
+        <span className="google-login-text">
+          {mode === "signup"
+            // Texto para registro
+            ? translations.googleRegister
+            // Texto para login
+            : translations.googleLogin}
+        </span>
+      </button>
+    );
+  };
+
+  /**********************************************************************************************************************************
+  *************************************************** REGISTRO CON GOOGLE ***********************************************************
+  **********************************************************************************************************************************/
   const googleRegister = () => {
     const googleRegisterUrl = "https://127.0.0.1:8000/auth/oauth2/login/google/";
     window.location.href = googleRegisterUrl;
   };
 
+  /**********************************************************************************************************************************
+  ***************************************************** LOGIN CON GOOGLE ************************************************************
+  **********************************************************************************************************************************/
   const googleLogin = () => {
     const googleLoginUrl = "https://127.0.0.1:8000/auth/oauth2/login/google/";
     window.location.href = googleLoginUrl;
   };
 
+  /**********************************************************************************************************************************
+  *********************************************************** HTML ******************************************************************
+  **********************************************************************************************************************************/
   return (
     <div className="signup-body">
       <div className={`signup-container ${isActive ? "signup-active" : ""}`} id="container">
@@ -315,9 +377,8 @@ const LoginRegister = () => {
             </div>
           </div>
         </div>
-
         <div className="signup-form-container signup-sign-in">
-          <div className="form">
+          <div id="formLogin" className="form">
             <h1 id="login-title">{t.logIn}</h1>
             <input
               type="text"
@@ -358,9 +419,48 @@ const LoginRegister = () => {
                 </>
               )}
             </button>
+            {showPopup && (
+              <div className="popup-overlay">
+                <div className="popup">
+                  <p id="popupMessage">{popupMessage}</p>
+                  <button
+                    id="popupButtonMail"
+                    onClick={() => resendVerificationEmail(formData.email)}
+                    disabled={resendCooldown}
+                    style={{
+                      marginTop: "10px",
+                      padding: "5px 10px",
+                      backgroundColor: resendCooldown ? "gray" : "blue",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: resendCooldown ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {resendCooldown
+                      ? `Reenviar email de confirmação (${secondsLeft}s)`
+                      : "Reenviar email de confirmação"}
+                  </button>
+                  <button
+                    id="popupButtonClose"
+                    onClick={() => setShowPopup(false)} // Cierra el popup
+                    style={{
+                      marginTop: "10px",
+                      padding: "5px 10px",
+                      backgroundColor: "red",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
         <div className="signup-toggle-container">
           <div className="signup-toggle">
             <div className="signup-toggle-panel signup-toggle-left">
