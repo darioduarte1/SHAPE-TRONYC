@@ -201,6 +201,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '60/minute',  # Límite para usuarios autenticados
+        'resend_email': '1/minute',  # Límite para la función de reenviar correo
+    },
 }
 
 # SIMPLE JWT CONFIGURATION

@@ -20,7 +20,12 @@ from .services.google_auth import exchange_authorization_code_for_tokens, proces
 from .utils import get_tokens_for_user
 from .serializers import UserSerializer
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.utils.translation import activate
+from .throttles import ResendEmailRateThrottle
+import logging
+from backend.profiles.models import UserProfile
+from django.contrib.auth.hashers import check_password
 
 
 
@@ -30,7 +35,9 @@ from django.utils.translation import activate
 
 User = get_user_model()
 
-# --- Funciones auxiliares ---
+#####################################################################################################################################
+######################################################### VERIFICAR TOKEN ###########################################################
+#####################################################################################################################################
 def verify_token(uidb64, token):
     """Verifica un token generado para la activación del usuario."""
     try:
@@ -44,7 +51,9 @@ def verify_token(uidb64, token):
     return None
 
 
-# --- Vistas de autenticación ---
+#####################################################################################################################################
+######################################################### REGISTER ##################################################################
+#####################################################################################################################################
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -114,7 +123,9 @@ class RegisterView(APIView):
         else:
             activate("en")  # Idioma predeterminado
 
-
+#####################################################################################################################################
+##################################################### VERIFICATION EMAIL ############################################################
+#####################################################################################################################################
 class VerifyEmailView(APIView):
     """Vista para manejar la verificación del correo electrónico."""
     permission_classes = [AllowAny]
@@ -127,46 +138,92 @@ class VerifyEmailView(APIView):
             return Response({"message": "Cuenta activada exitosamente."}, status=status.HTTP_200_OK)
         return Response({"error": "Token inválido o expirado."}, status=status.HTTP_400_BAD_REQUEST)
 
-
+#####################################################################################################################################
+################################################# REENVIAR VERIFICACION EMAIL #######################################################
+#####################################################################################################################################
 class ResendVerificationEmailView(APIView):
-    """Vista para reenviar el correo de verificación."""
+    throttle_classes = [ResendEmailRateThrottle]
     permission_classes = [AllowAny]
 
     def post(self, request):
         email = request.data.get("email")
         try:
             user = User.objects.get(email=email)
-
             if user.is_active:
-                return Response({"error": "Account is already active."}, status=status.HTTP_400_BAD_REQUEST)
-
+                return Response(
+                    {"error": "La cuenta ya está activa."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             RegisterView().send_verification_email(user)
-            return Response({"message": "Verification email resent."}, status=status.HTTP_200_OK)
-
+            return Response(
+                {"message": "Correo de verificación reenviado exitosamente."},
+                status=status.HTTP_200_OK
+            )
         except User.DoesNotExist:
-            return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "No existe un usuario con este correo."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-
+#####################################################################################################################################
+######################################################### LOGIN #####################################################################
+#####################################################################################################################################
 class LoginView(APIView):
-    """Vista para manejar el inicio de sesión."""
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         username = request.data.get("username")
         password = request.data.get("password")
-        user = authenticate(username=username, password=password)
 
+        # Busca al usuario por nombre de usuario
+        user = UserProfile.objects.filter(username=username).first()
+
+        # Debug: Información del usuario
+        print(f"Intento de login para el usuario: {username}")
         if user:
-            if user.is_active:
-                tokens = get_tokens_for_user(user)
-                return Response({"tokens": tokens}, status=status.HTTP_200_OK)
+            print(f"Usuario encontrado: {user.username}")
+            print(f"Usuario activo: {user.is_active}")
+            print(f"Idioma del usuario: {user.language}")
+        else:
+            print("Usuario no encontrado.")
             return Response(
-                {"error": "Tu cuenta no está activada. Por favor verifica tu correo."},
+                {"error": "Invalid credentials.", "language": "en"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        # Determina el idioma del usuario o usa 'en' como predeterminado
+        language = getattr(user, "language", "en")
+        activate(language)  # Activa el idioma
+
+        # Verifica la contraseña manualmente
+        if not check_password(password, user.password):
+            print("Contraseña inválida.")
+            return Response(
+                {"error": "Invalid credentials.", "language": language},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        # Usuario autenticado pero inactivo
+        if not user.is_active:
+            print("Usuario inactivo. Retornando 403.")
+            return Response(
+                {
+                    "error": "A sua conta ainda não foi verificada. Por favor verifique a caixa de entrada e o spam! Active o link enviado!",
+                    "language": language,
+                },
                 status=status.HTTP_403_FORBIDDEN,
             )
-        return Response({"error": "Credenciales inválidas."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Usuario activo y autenticado
+        tokens = get_tokens_for_user(user)
+        print("Usuario activo. Retornando tokens.")
+        return Response({"tokens": tokens}, status=status.HTTP_200_OK)
 
 
+
+#####################################################################################################################################
+######################################################### LOGOUT ####################################################################
+#####################################################################################################################################
 class LogoutView(APIView):
     """Vista para manejar el cierre de sesión."""
     permission_classes = [IsAuthenticated]
@@ -182,7 +239,9 @@ class LogoutView(APIView):
                 return Response({"error": "Invalid token or token already blacklisted."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Refresh token is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-
+#####################################################################################################################################
+#################################################### CHANGE PASSWORD ################################################################
+#####################################################################################################################################
 class ChangePasswordView(APIView):
     """Vista para cambiar la contraseña del usuario."""
     permission_classes = [IsAuthenticated]
@@ -212,7 +271,9 @@ class ChangePasswordView(APIView):
         user.save()
         return Response({"message": "Password updated successfully!"}, status=status.HTTP_200_OK)
 
-
+#####################################################################################################################################
+#################################################### PROTECTED VIEW #################################################################
+#####################################################################################################################################
 class ProtectedView(APIView):
     """Vista para rutas protegidas."""
     permission_classes = [IsAuthenticated]
@@ -221,7 +282,9 @@ class ProtectedView(APIView):
         return Response({"message": "This is a protected route."}, status=status.HTTP_200_OK)
 
 
-# --- Vistas de autenticación con Google ---
+#####################################################################################################################################
+################################################### VISTA LOGIN VIEW ################################################################
+#####################################################################################################################################
 class GoogleLoginView(APIView):
     """Vista para manejar el inicio de sesión con Google."""
     permission_classes = [AllowAny]
@@ -239,7 +302,9 @@ class GoogleLoginView(APIView):
         query_string = urlencode(params)
         return redirect(f"{google_auth_url}?{query_string}")
 
-
+#####################################################################################################################################
+################################################### CALL BACK DE GOOGLE #############################################################
+#####################################################################################################################################
 class GoogleCallbackView(APIView):
     """Vista para manejar la callback de Google."""
     permission_classes = [AllowAny]
