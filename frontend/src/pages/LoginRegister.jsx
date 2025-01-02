@@ -5,6 +5,26 @@ import { toast } from "react-toastify";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
+// Componente reutilizable para los botones de Google
+const GoogleAuthButton = ({ mode, onClick, translations }) => {
+  return (
+    <button id="googleLoginButton" className="google-login-button" onClick={onClick}>
+      <img
+        src="https://developers.google.com/identity/images/g-logo.png"
+        alt="Google Logo"
+        className="google-logo"
+      />
+      <span className="google-login-text">
+        {mode === "signup"
+          // Texto para registro
+          ? translations.googleRegister
+          // Texto para login
+          : translations.googleLogin}
+      </span>
+    </button>
+  );
+};
+
 const LoginRegister = () => {
   const [isActive, setIsActive] = useState(false);
   const [isPartner, setIsPartner] = useState(false);
@@ -19,7 +39,8 @@ const LoginRegister = () => {
 
   const translations = {
     en: {
-      googleLogin: "Sign Up\nwith Google",
+      googleRegister: "Sign Up\nwith Google",
+      googleLogin: "Log In\nwith Google",
       emailVerificationPending:
         "Your account is not yet verified. Check your email for the confirmation link. A new email has been sent.",
       accountCreated: "Account created successfully. Please check your email to verify your account.",
@@ -33,16 +54,17 @@ const LoginRegister = () => {
       password: "Password",
       confirmPassword: "Confirm Password",
       signUp: "Sign Up",
-      logIn: "Log In",
+      logIn: "Log\nIn",
       welcomeBack: "Welcome back!",
       enterLanguage: "Please select a language",
-      enterDetails: "Please enter your details to log in",
-      hiFriend: "Hi, friend!",
+      enterDetails: "Please enter\nyour details to\nlog in",
+      hiFriend: "Hi,\nfriend!",
       registerData: "Register with your personal data",
       forgotPassword: "Forgot your password?",
     },
     es: {
-      googleLogin: "Regístrate\ncon Google",
+      googleRegister: "Regístrate\ncon Google",
+      googleLogin: "Inicia sesión\ncon Google",
       emailVerificationPending:
         "Tu cuenta no está verificada. Revisa tu correo electrónico para el enlace de confirmación. Se ha enviado un nuevo correo.",
       accountCreated: "Cuenta creada exitosamente. Revisa tu correo para verificar tu cuenta.",
@@ -59,13 +81,14 @@ const LoginRegister = () => {
       logIn: "Iniciar Sesión",
       welcomeBack: "¡Bienvenido de nuevo!",
       enterLanguage: "Por favor, selecciona un idioma",
-      enterDetails: "Por favor, introduce tus datos para iniciar sesión",
+      enterDetails: "Por favor, introduce tus datos para\niniciar sesión",
       hiFriend: "¡Hola, amigo!",
       registerData: "Regístrate con tus datos personales",
       forgotPassword: "¿Olvidaste tu contraseña?",
     },
     pt: {
-      googleLogin: "Regista-te\ncom Google",
+      googleRegister: "Regista-te\ncom Google",
+      googleLogin: "Inicia sessão\ncom Google",
       emailVerificationPending:
         "Sua conta ainda não foi verificada. Verifique seu e-mail para o link de confirmação. Um novo e-mail foi enviado.",
       accountCreated: "Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.",
@@ -82,7 +105,7 @@ const LoginRegister = () => {
       logIn: "Iniciar Sessão",
       welcomeBack: "Bem-vindo de volta!",
       enterLanguage: "Por favor, escolha um idioma",
-      enterDetails: "Por favor, insira os seus dados para iniciar sessão",
+      enterDetails: "Por favor, insira os seus dados para\niniciar sessão",
       hiFriend: "Olá, amigo!",
       registerData: "Registe-se com os seus dados pessoais",
       forgotPassword: "Esqueceu-se da sua palavra-passe?",
@@ -92,7 +115,6 @@ const LoginRegister = () => {
   const t = translations[language];
 
   useEffect(() => {
-    // Manejar token de acceso en la URL
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get("access_token");
     if (accessToken) {
@@ -184,7 +206,6 @@ const LoginRegister = () => {
         navigate("/home");
       } else if (data.error === "Email not verified") {
         toast.warning(t.emailVerificationPending);
-        await resendVerificationEmail(formData.email);
       } else {
         toast.error(t.invalidCredentials);
       }
@@ -215,6 +236,11 @@ const LoginRegister = () => {
     }
   };
 
+  const googleRegister = () => {
+    const googleRegisterUrl = "https://127.0.0.1:8000/auth/oauth2/login/google/";
+    window.location.href = googleRegisterUrl;
+  };
+
   const googleLogin = () => {
     const googleLoginUrl = "https://127.0.0.1:8000/auth/oauth2/login/google/";
     window.location.href = googleLoginUrl;
@@ -229,6 +255,7 @@ const LoginRegister = () => {
             <input
               type="text"
               name="username"
+              id="formRegisterUsername"
               placeholder={t.username}
               value={formData.username}
               onChange={handleInputChange}
@@ -237,6 +264,7 @@ const LoginRegister = () => {
             <input
               type="email"
               name="email"
+              id="formRegisterEmail"
               placeholder={t.email}
               value={formData.email}
               onChange={handleInputChange}
@@ -245,6 +273,7 @@ const LoginRegister = () => {
             <input
               type="password"
               name="password"
+              id="formRegisterPassword"
               placeholder={t.password}
               value={formData.password}
               onChange={handleInputChange}
@@ -253,6 +282,7 @@ const LoginRegister = () => {
             <input
               type="password"
               name="confirmPassword"
+              id="formRegisterConfirmPassword"
               placeholder={t.confirmPassword}
               value={formData.confirmPassword}
               onChange={handleInputChange}
@@ -274,15 +304,8 @@ const LoginRegister = () => {
                   {isPartner ? "Staff" : "User"}
                 </span>
               </div>
-              <button onClick={signup}>{t.signUp}</button>
-              <button className="google-login-button" onClick={googleLogin}>
-                <img
-                  src="https://developers.google.com/identity/images/g-logo.png"
-                  alt="Google Logo"
-                  className="google-logo"
-                />
-                <span className="google-login-text">{t.googleLogin}</span>
-              </button>
+              <button id="signUpButton" onClick={signup}>{t.signUp}</button>
+              <GoogleAuthButton mode="signup" onClick={googleRegister} translations={t} />
             </div>
           </div>
         </div>
@@ -293,6 +316,7 @@ const LoginRegister = () => {
             <input
               type="text"
               name="username"
+              id="formRegisterUsername"
               placeholder={t.username}
               value={formData.username}
               onChange={handleInputChange}
@@ -300,17 +324,33 @@ const LoginRegister = () => {
             <input
               type="password"
               name="password"
+              id="formRegisterPassword"
               placeholder={t.password}
               value={formData.password}
               onChange={handleInputChange}
             />
-            <button onClick={login}>{t.logIn}</button>
+            <button id="logInButton" onClick={login}>{t.logIn}</button>
+            <GoogleAuthButton mode="login" onClick={googleLogin} translations={t} />
             <button
               onClick={() => toast.info("Función no implementada.")}
               className="forgot-password-button"
             >
-              <span>{t.forgotPassword.split(" ")[0]}</span>
-              <span>{t.forgotPassword.split(" ").slice(1).join(" ")}</span>
+              {language === "pt" ? (
+                <>
+                  <span>Esqueceu-se da</span>
+                  <span>sua palavra-passe?</span>
+                </>
+              ) : language === "en" ? (
+                <>
+                  <span>Forgot your</span>
+                  <span>password?</span>
+                </>
+              ) : (
+                <>
+                  <span>{t.forgotPassword.split(" ")[0]}</span>
+                  <span>{t.forgotPassword.split(" ").slice(1).join(" ")}</span>
+                </>
+              )}
             </button>
           </div>
         </div>
