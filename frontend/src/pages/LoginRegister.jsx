@@ -141,37 +141,43 @@ const LoginRegister = () => {
 
   const signup = async () => {
     if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
-      toast.error("All fields are required.");
+      toast.error(t.errorOccured);
       return;
     }
-
+  
     if (formData.password !== formData.confirmPassword) {
       toast.error(t.passwordsMismatch);
       return;
     }
-
+  
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept-Language": language, // Pasar el idioma seleccionado
         },
         body: JSON.stringify({
           username: formData.username,
           email: formData.email,
           password: formData.password,
-          confirm_password: formData.confirmPassword,
-          is_partner: isPartner,
-          language,
+          language, // Asegúrate de que este valor se envíe
         }),
       });
-
+  
       if (response.ok) {
-        toast.success(t.accountCreated);
+        toast.success(t.accountCreated, { autoClose: 10000 }); // Duración ajustada a 10 segundos
         setIsActive(false);
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error || t.errorOccured);
+        // Mostrar mensajes específicos de errores
+        if (errorData.errors) {
+          Object.entries(errorData.errors).forEach(([field, messages]) => {
+            messages.forEach((msg) => toast.error(msg));
+          });
+        } else {
+          toast.error(t.errorOccured);
+        }
       }
     } catch (error) {
       console.error("Registration error", error);
@@ -215,26 +221,26 @@ const LoginRegister = () => {
     }
   };
 
-  const resendVerificationEmail = async (email) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/resend-verification/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+  // const resendVerificationEmail = async (email) => {
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/auth/resend-verification/`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ email }),
+  //     });
 
-      if (response.ok) {
-        toast.success(t.resendVerificationEmail);
-      } else {
-        toast.error(t.errorOccured);
-      }
-    } catch (error) {
-      console.error("Resend verification error", error);
-      toast.error(t.errorOccured);
-    }
-  };
+  //     if (response.ok) {
+  //       toast.success(t.resendVerificationEmail);
+  //     } else {
+  //       toast.error(t.errorOccured);
+  //     }
+  //   } catch (error) {
+  //     console.error("Resend verification error", error);
+  //     toast.error(t.errorOccured);
+  //   }
+  // };
 
   const googleRegister = () => {
     const googleRegisterUrl = "https://127.0.0.1:8000/auth/oauth2/login/google/";

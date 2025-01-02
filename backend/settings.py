@@ -101,7 +101,23 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
+
+# Idiomas soportados
+LANGUAGES = [
+    ('en', 'English'),
+    ('es', 'Español'),
+    ('pt', 'Português'),
+]
+
+# Ruta para los archivos de traducción
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
+# Configuración de idioma predeterminado
+LANGUAGE_CODE = 'en-us'
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',  # Backend de Google

@@ -19,6 +19,8 @@ from .forms import UserRegistrationForm
 from .services.google_auth import exchange_authorization_code_for_tokens, process_google_user
 from .utils import get_tokens_for_user
 from .serializers import UserSerializer
+from django.utils.translation import gettext as _
+from django.utils.translation import activate
 
 
 
@@ -44,38 +46,73 @@ def verify_token(uidb64, token):
 
 # --- Vistas de autenticación ---
 class RegisterView(APIView):
-    """Vista para registrar un nuevo usuario."""
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            user.is_active = False  # Desactivar usuario hasta que verifique el correo
+            user.is_active = False  # Usuario desactivado hasta verificar el correo
             user.save()
 
-            # Enviar correo de verificación
+            # Activar idioma según el lenguaje del usuario
+            self.activate_language(user.language)
+
             try:
                 self.send_verification_email(user)
                 return Response(
-                    {"message": "Usuario registrado exitosamente. Verifica tu correo para activar la cuenta."},
+                    {"message": _("Usuario registrado exitosamente. Verifica tu correo para activar la cuenta.")},
                     status=status.HTTP_201_CREATED,
                 )
-            except Exception:
+            except (BadHeaderError, SMTPException) as e:
                 return Response(
-                    {"error": "No se pudo enviar el correo de verificación. Contacta al soporte."},
+                    {"error": _("No se pudo enviar el correo de verificación. Contacta al soporte.")},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # Traducir mensajes de error
+            errors = serializer.errors
+            translated_errors = {
+                field: [_(msg) for msg in messages]
+                for field, messages in errors.items()
+            }
+            return Response({"errors": translated_errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def send_verification_email(self, user):
-        """Envía un correo para la verificación de la cuenta."""
+        """Envía un correo de verificación en el idioma correspondiente."""
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         activation_link = f"http://127.0.0.1:8000/auth/verify-email/{uid}/{token}/"
-        subject = "Confirma tu cuenta"
-        message = f"Hola {user.username}, verifica tu cuenta haciendo clic en el enlace: {activation_link}"
+
+        # Mensajes traducidos
+        translations = {
+            "en": {
+                "subject": "Confirm your account",
+                "message": f"Hi {user.username}, please confirm your account by clicking on the following link: {activation_link}"
+            },
+            "es": {
+                "subject": "Confirma tu cuenta",
+                "message": f"Hola {user.username}, por favor confirma tu cuenta haciendo clic en el siguiente enlace: {activation_link}"
+            },
+            "pt": {
+                "subject": "Confirme sua conta",
+                "message": f"Olá {user.username}, por favor confirme sua conta clicando no seguinte link: {activation_link}"
+            }
+        }
+
+        # Obtener el idioma del usuario o usar inglés como predeterminado
+        language = user.language if user.language in translations else "en"
+        subject = translations[language]["subject"]
+        message = translations[language]["message"]
+
         send_mail(subject, message, "noreply@example.com", [user.email])
+
+    def activate_language(self, language):
+        """Activa el idioma seleccionado por el usuario."""
+        if language:
+            activate(language)
+        else:
+            activate("en")  # Idioma predeterminado
 
 
 class VerifyEmailView(APIView):
