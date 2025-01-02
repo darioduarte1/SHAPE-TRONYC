@@ -1,83 +1,98 @@
+# Importaciones necesarias
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import check_password
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.http import JsonResponse
+from smtplib import SMTPException
 from django.shortcuts import redirect
 from django.conf import settings
-from django.template.loader import render_to_string
-from .forms import UserRegistrationForm
-import requests
 from urllib.parse import urlencode
+import requests
+from .forms import UserRegistrationForm
 from .services.google_auth import exchange_authorization_code_for_tokens, process_google_user
-from django.db import IntegrityError
 from .utils import get_tokens_for_user
+from .serializers import UserSerializer
 
 
+
+
+
+
+
+User = get_user_model()
+
+# --- Funciones auxiliares ---
+def verify_token(uidb64, token):
+    """Verifica un token generado para la activación del usuario."""
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return None
+
+    if user and default_token_generator.check_token(user, token):
+        return user
+    return None
+
+
+# --- Vistas de autenticación ---
 class RegisterView(APIView):
+    """Vista para registrar un nuevo usuario."""
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        form = UserRegistrationForm(data=request.data)
-        if form.is_valid():
-            user = form.save(commit=False)
-            # Default to English if not provided
-            user.language = request.data.get("language", "en")
-            user.is_partner = request.data.get("is_partner", False)
-            user.is_active = False  # Usuario inactivo hasta confirmar el email
+    def post(self, request, *args, **kwargs):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            user.is_active = False  # Desactivar usuario hasta que verifique el correo
             user.save()
 
             # Enviar correo de verificación
-            self.send_verification_email(user)
-            return Response(
-                {"message": "User registered successfully! Please verify your email."},
-                status=status.HTTP_201_CREATED,
-            )
-        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                self.send_verification_email(user)
+                return Response(
+                    {"message": "Usuario registrado exitosamente. Verifica tu correo para activar la cuenta."},
+                    status=status.HTTP_201_CREATED,
+                )
+            except Exception:
+                return Response(
+                    {"error": "No se pudo enviar el correo de verificación. Contacta al soporte."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def send_verification_email(self, user):
-        token = default_token_generator.make_token(user)
+        """Envía un correo para la verificación de la cuenta."""
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        verification_link = f"http://yourfrontendurl.com/verify-email/{uid}/{token}/"
-
-        subject = "Verify Your Email"
-        message = render_to_string("emails/email_verification.html", {
-            "user": user,
-            "verification_link": verification_link,
-        })
-
+        token = default_token_generator.make_token(user)
+        activation_link = f"http://127.0.0.1:8000/auth/verify-email/{uid}/{token}/"
+        subject = "Confirma tu cuenta"
+        message = f"Hola {user.username}, verifica tu cuenta haciendo clic en el enlace: {activation_link}"
         send_mail(subject, message, "noreply@example.com", [user.email])
 
 
 class VerifyEmailView(APIView):
+    """Vista para manejar la verificación del correo electrónico."""
     permission_classes = [AllowAny]
 
-    def get(self, request, uidb64, token):
-        try:
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-
-            if default_token_generator.check_token(user, token):
-                user.is_active = True
-                user.save()
-                return Response({"message": "Email verified successfully!"}, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
-
-        except User.DoesNotExist:
-            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+    def get(self, request, uidb64, token, *args, **kwargs):
+        user = verify_token(uidb64, token)
+        if user:
+            user.is_active = True
+            user.save()
+            return Response({"message": "Cuenta activada exitosamente."}, status=status.HTTP_200_OK)
+        return Response({"error": "Token inválido o expirado."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ResendVerificationEmailView(APIView):
+    """Vista para reenviar el correo de verificación."""
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -96,36 +111,27 @@ class ResendVerificationEmailView(APIView):
 
 
 class LoginView(APIView):
+    """Vista para manejar el inicio de sesión."""
     permission_classes = [AllowAny]
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         username = request.data.get("username")
         password = request.data.get("password")
         user = authenticate(username=username, password=password)
 
         if user:
-            if not user.is_active:
-                # Usuario no ha verificado su email
-                RegisterView().send_verification_email(user)
-                return Response(
-                    {"error": "Email not verified. A new verification email has been sent."},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-
-            refresh = RefreshToken.for_user(user)
+            if user.is_active:
+                tokens = get_tokens_for_user(user)
+                return Response({"tokens": tokens}, status=status.HTTP_200_OK)
             return Response(
-                {
-                    "access": str(refresh.access_token),
-                    "refresh": str(refresh),
-                    "user_id": user.id,
-                    "language": user.language,
-                },
-                status=status.HTTP_200_OK,
+                {"error": "Tu cuenta no está activada. Por favor verifica tu correo."},
+                status=status.HTTP_403_FORBIDDEN,
             )
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({"error": "Credenciales inválidas."}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class LogoutView(APIView):
+    """Vista para manejar el cierre de sesión."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -141,6 +147,7 @@ class LogoutView(APIView):
 
 
 class ChangePasswordView(APIView):
+    """Vista para cambiar la contraseña del usuario."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -170,14 +177,17 @@ class ChangePasswordView(APIView):
 
 
 class ProtectedView(APIView):
+    """Vista para rutas protegidas."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         return Response({"message": "This is a protected route."}, status=status.HTTP_200_OK)
 
-# Google Callback View
+
+# --- Vistas de autenticación con Google ---
 class GoogleLoginView(APIView):
-    permission_classes = [AllowAny]  # Esto asegura que no se requiera autenticación
+    """Vista para manejar el inicio de sesión con Google."""
+    permission_classes = [AllowAny]
 
     def get(self, request):
         google_auth_url = "https://accounts.google.com/o/oauth2/auth"
@@ -192,12 +202,9 @@ class GoogleLoginView(APIView):
         query_string = urlencode(params)
         return redirect(f"{google_auth_url}?{query_string}")
 
-# Google Callback View
-User = get_user_model()
-
-# backend/authentication/views.py
 
 class GoogleCallbackView(APIView):
+    """Vista para manejar la callback de Google."""
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -240,7 +247,6 @@ class GoogleCallbackView(APIView):
         )
 
         # Generate JWT tokens
-        from .utils import get_tokens_for_user
         jwt_tokens = get_tokens_for_user(user)
 
         # Redirect to frontend with tokens
