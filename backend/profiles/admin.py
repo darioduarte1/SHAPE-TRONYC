@@ -9,7 +9,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     Esta clase personaliza la visualización de instancias de UserProfile en el panel de
     administración de Django.
     """
-    list_display = ('get_username', 'full_name', 'gender', 'age', 'email', 'contact_number', 'language', 'is_partner')
+    list_display = ('get_username', 'full_name', 'gender', 'age', 'email', 'contact_number', 'language', 'is_partner', 'is_active')
 
     def get_username(self, obj):
         return obj.username  # Devuelve el nombre de usuario asociado

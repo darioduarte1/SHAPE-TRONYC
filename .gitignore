@@ -38,4 +38,4 @@ venv/
 .idea/
 .vscode/
 *.swp
-.vercel
+.vercelsend_test.py

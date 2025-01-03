@@ -7,18 +7,34 @@ const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkTokens = () => {
-      const accessToken = localStorage.getItem('access');
-      const refreshToken = localStorage.getItem('refresh');
+    const manageTokens = () => {
+      // Extraer tokens de la URL si están presentes
+      const params = new URLSearchParams(window.location.search);
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
 
-      if (!accessToken || !refreshToken) {
-        navigate('/login');
+      if (accessToken && refreshToken) {
+        // Guardar tokens en localStorage
+        localStorage.setItem('access', accessToken);
+        localStorage.setItem('refresh', refreshToken);
+
+        // Limpiar los parámetros de la URL
+        window.history.replaceState({}, document.title, '/home');
+        setLoading(false); // Desactiva el indicador de carga
       } else {
-        setLoading(false); // Desactiva la carga una vez validados
+        // Validar si los tokens ya están en localStorage
+        const storedAccessToken = localStorage.getItem('access');
+        const storedRefreshToken = localStorage.getItem('refresh');
+
+        if (!storedAccessToken || !storedRefreshToken) {
+          navigate('/login'); // Redirigir al login si no hay tokens
+        } else {
+          setLoading(false); // Desactiva el indicador de carga si los tokens son válidos
+        }
       }
     };
 
-    checkTokens();
+    manageTokens();
   }, [navigate]);
 
   if (loading) {

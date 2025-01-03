@@ -17,4 +17,5 @@ urlpatterns = [
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/', include('backend.profiles.urls')),  # Incluye las URLs de profiles
+    path('auth/oauth2/', include('social_django.urls', namespace='social')),  # Rutas para autenticación con Google
 ]

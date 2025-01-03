@@ -17,18 +17,21 @@ const Header = () => {
     const translations = {
         en: {
             menu: "Menu",
+            home: "Home",
             profile: "Profile",
             security: "Security",
             logout: "Logout",
         },
         es: {
             menu: "Menú",
+            home: "Inicio",
             profile: "Perfil",
             security: "Seguridad",
             logout: "Cerrar sesión",
         },
         pt: {
             menu: "Menu",
+            home: "Início",
             profile: "Perfil",
             security: "Segurança",
             logout: "Sair",
@@ -95,6 +98,14 @@ const Header = () => {
                             <i className="bi bi-gear-fill"></i>
                         </button>
                         <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
+                            <li>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => navigate("/home")}
+                                >
+                                    {translations[language].home}
+                                </button>
+                            </li>
                             <li>
                                 <a className="dropdown-item" href="/profile">
                                     {translations[language].profile}
