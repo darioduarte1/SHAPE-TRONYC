@@ -91,7 +91,10 @@ class RegisterView(APIView):
         """Envía un correo de verificación en el idioma correspondiente."""
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        activation_link = f"http://127.0.0.1:8000/auth/verify-email/{uid}/{token}/"
+        activation_link = f"{settings.PROTOCOL}://{settings.DEFAULT_DOMAIN}/auth/verify-email/{uid}/{token}/"
+        
+        # Log para verificar el enlace generado
+        logging.debug(f"Generated activation link: {activation_link}")
 
         # Mensajes traducidos
         translations = {
@@ -135,8 +138,17 @@ class VerifyEmailView(APIView):
         if user:
             user.is_active = True
             user.save()
-            return Response({"message": "Cuenta activada exitosamente."}, status=status.HTTP_200_OK)
-        return Response({"error": "Token inválido o expirado."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Obtener el idioma del usuario
+            language = user.language if user.language else "en"
+
+            # URL de redirección al frontend con un mensaje de éxito
+            redirect_url = f"{settings.FRONTEND_HOME_URL}/auth?status=success&language={language}"
+            return redirect(redirect_url)
+
+        # En caso de token inválido, redirigir con un error
+        redirect_url = f"{settings.FRONTEND_HOME_URL}/auth?status=error"
+        return redirect(redirect_url)
 
 #####################################################################################################################################
 ################################################# REENVIAR VERIFICACION EMAIL #######################################################
@@ -145,8 +157,9 @@ class VerifyEmailView(APIView):
 logger = logging.getLogger(__name__)
 
 class ResendVerificationEmailView(APIView):
+
     throttle_classes = [ResendEmailRateThrottle]
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # Esto permite acceso a todos, autenticados o no.
 
     def post(self, request):
         username = request.data.get("username")
@@ -168,12 +181,15 @@ class ResendVerificationEmailView(APIView):
                     {"error": "La cuenta ya está activa."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            if not user.email:
-                logging.error(f"El usuario {username} no tiene un email registrado.")
-                return Response(
-                    {"error": "El usuario no tiene un email registrado."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+
+            # Generar el enlace
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            verification_url = f"{settings.PROTOCOL}://{settings.DEFAULT_DOMAIN}/auth/verify-email/{uid}/{token}/"
+
+            # Agregar el print para depuración
+            print(f"Verification URL: {verification_url}")  # Para verificar en los logs
+
             RegisterView().send_verification_email(user)
             logging.info(f"Correo reenviado al usuario: {username} ({user.email}).")
             return Response(
@@ -200,14 +216,7 @@ class LoginView(APIView):
         # Busca al usuario por nombre de usuario
         user = UserProfile.objects.filter(username=username).first()
 
-        # Debug: Información del usuario
-        print(f"Intento de login para el usuario: {username}")
-        if user:
-            print(f"Usuario encontrado: {user.username}")
-            print(f"Usuario activo: {user.is_active}")
-            print(f"Idioma del usuario: {user.language}")
-        else:
-            print("Usuario no encontrado.")
+        if not user:
             return Response(
                 {"error": "Invalid credentials.", "language": "en"},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -219,7 +228,6 @@ class LoginView(APIView):
 
         # Verifica la contraseña manualmente
         if not check_password(password, user.password):
-            print("Contraseña inválida.")
             return Response(
                 {"error": "Invalid credentials.", "language": language},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -227,7 +235,6 @@ class LoginView(APIView):
 
         # Usuario autenticado pero inactivo
         if not user.is_active:
-            print("Usuario inactivo. Retornando 403.")
             return Response(
                 {
                     "error": "A sua conta ainda não foi verificada. Por favor verifique a caixa de entrada e o spam! Active o link enviado!",
@@ -238,8 +245,16 @@ class LoginView(APIView):
 
         # Usuario activo y autenticado
         tokens = get_tokens_for_user(user)
-        print("Usuario activo. Retornando tokens.")
-        return Response({"tokens": tokens}, status=status.HTTP_200_OK)
+
+        # Incluye el idioma y el ID del usuario en la respuesta
+        return Response(
+            {
+                "tokens": tokens,
+                "language": language,
+                "user_id": user.id,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 

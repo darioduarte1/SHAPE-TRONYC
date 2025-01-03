@@ -12,7 +12,7 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 
-FRONTEND_HOME_URL = "https://localhost:3000/home"  # Cambia esto según tu configuración
+FRONTEND_HOME_URL = "https://localhost:3000"  # Cambia esto según tu configuración
 
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
@@ -177,6 +177,9 @@ CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
 X_FRAME_OPTIONS = 'DENY'
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+DEFAULT_DOMAIN = os.getenv('DEFAULT_DOMAIN', '127.0.0.1:8000')  # Valor por defecto para desarrollo
+PROTOCOL = os.getenv('PROTOCOL', 'https')  # Por defecto usa HTTPS
 
 # CORS CONFIGURATION
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default="").split(',')
