@@ -1,40 +1,81 @@
 import os
+import logging
+import sys
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s %(message)s',
+    stream=sys.stdout,
+)
+
+FRONTEND_HOME_URL = "https://localhost:3000"  # Cambia esto según tu configuración
+
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = config('SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI')
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# BASE DIRECTORY
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Secret Key
+# SECRET KEY AND DEBUG SETTINGS
 SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-# Debug
-DEBUG = True
+# ALLOWED HOSTS
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
 
+# STATIC FILES CONFIGURATION
 STATIC_URL = '/static/'
-
 if DEBUG:
-    STATICFILES_DIRS = [BASE_DIR / 'static']  # Para archivos estáticos en desarrollo
+    STATICFILES_DIRS = [BASE_DIR / 'static']  # Static files in development
 else:
-    STATIC_ROOT = BASE_DIR / 'staticfiles'  # Para `collectstatic` en producción
+    STATIC_ROOT = BASE_DIR / 'staticfiles'  # Collect static in production
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Allowed Hosts
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
+# MEDIA FILES CONFIGURATION
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Application definition
+# CLOUDINARY CONFIGURATION
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config("CLOUDINARY_CLOUD_NAME"),
+    'API_KEY': config("CLOUDINARY_API_KEY"),
+    'API_SECRET': config("CLOUDINARY_API_SECRET"),
+}
+
+# EMAIL CONFIGURATION
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_SSL = False
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+#SENDGRID_API_KEY = config('SENDGRID_API_KEY')
+#DEFAULT_FROM_EMAIL = "shapetronyc@gmail.com"  # Correo remitente
+
+# APPLICATIONS CONFIGURATION
 INSTALLED_APPS = [
     # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.messages',
     'django.contrib.sessions',
+    'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third-party apps
     'cloudinary',
     'cloudinary_storage',
@@ -42,69 +83,59 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
-    
+    'social_django',  # Para la autenticación con Google
+
     # Local apps
     'backend.profiles',
+    'backend.authentication',  # App for authentication
 ]
 
+# MIDDLEWARE CONFIGURATION
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CorsHeaders debe ir antes del CommonMiddleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'backend.middleware.custom_disallowed_host_middleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
-
-# Configurar Cloudinary como el backend de almacenamiento predeterminado
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-# Opcional: Configura una carpeta para las imágenes
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config("CLOUDINARY_CLOUD_NAME"),
-    'API_KEY': config("CLOUDINARY_API_KEY"),
-    'API_SECRET': config("CLOUDINARY_API_SECRET"),
-}
-
-
-# Cross-Origin Resource Sharing (CORS)
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default="").split(',')
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default="").split(',')
-
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
+# Idiomas soportados
+LANGUAGES = [
+    ('en', 'English'),
+    ('es', 'Español'),
+    ('pt', 'Português'),
 ]
 
-CORS_ALLOW_HEADERS = [
-    "accept",
-    "accept-encoding",
-    "authorization",
-    "content-type",
-    "dnt",
-    "origin",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
+# Ruta para los archivos de traducción
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
 ]
 
-CORS_ALLOW_CREDENTIALS = True
+# Configuración de idioma predeterminado
+LANGUAGE_CODE = 'en-us'
 
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',  # Backend de Google
+    'django.contrib.auth.backends.ModelBackend',  # Backend predeterminado de Django
+)
+
+
+# URL CONFIGURATION
 ROOT_URLCONF = 'backend.urls'
 
+# TEMPLATE CONFIGURATION
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'APP_DIRS': True,
+        'DIRS': [
+            BASE_DIR / 'backend/authentication/templates',  # Templates directory for the authentication app
+        ],
+        'APP_DIRS': True,  # Enable templates discovery in registered apps
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -116,50 +147,56 @@ TEMPLATES = [
     },
 ]
 
+# WSGI CONFIGURATION
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# Database
+# DATABASE CONFIGURATION
 DATABASES = {
     'default': dj_database_url.config(default=config('DATABASE_URL'), conn_max_age=600)
 }
 
+# AUTHENTICATION AND PASSWORD CONFIGURATION
 AUTH_USER_MODEL = 'profiles.UserProfile'
-
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
+# INTERNATIONALIZATION CONFIGURATION
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-# Security settings
-SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default='false') == 'true'
+# SECURITY CONFIGURATION
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
 SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
 X_FRAME_OPTIONS = 'DENY'
 
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Django REST Framework and JWT
+DEFAULT_DOMAIN = os.getenv('DEFAULT_DOMAIN', '127.0.0.1:8000')  # Valor por defecto para desarrollo
+PROTOCOL = os.getenv('PROTOCOL', 'https')  # Por defecto usa HTTPS
+
+# CORS CONFIGURATION
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default="").split(',')
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default="").split(',')
+
+CORS_ALLOW_METHODS = [
+    "DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT",
+]
+
+CORS_ALLOW_HEADERS = [
+    "accept", "accept-encoding", "authorization", "content-type", 
+    "dnt", "origin", "user-agent", "x-csrftoken", "x-requested-with",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# DJANGO REST FRAMEWORK CONFIGURATION
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -167,8 +204,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '60/minute',  # Límite para usuarios autenticados
+        'resend_email': '1/minute',  # Límite para la función de reenviar correo
+    },
 }
 
+# SIMPLE JWT CONFIGURATION
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -184,17 +229,51 @@ SIMPLE_JWT = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {name} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'app.log',
+            'formatter': 'verbose',
         },
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['console', 'file'],
         'level': 'DEBUG',
     },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'resend_verification': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
 }
-
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

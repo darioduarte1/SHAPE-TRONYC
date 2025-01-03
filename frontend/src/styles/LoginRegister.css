@@ -14,18 +14,6 @@
     font-weight: bold;
 }
 
-div.signup-toggle-panel.signup-toggle-left h1.portuguese-title {
-    font-size: 2 rem !important; /* Aumenta significativamente el tamaño del texto */
-    line-height: 0.7 !important; /* Reduce aún más la separación entre líneas */
-    text-align: center !important; /* Centra el texto */
-    margin: 0 auto !important; /* Asegura que esté centrado horizontalmente */
-}
-
-div.signup-toggle-panel.signup-toggle-left h1.portuguese-title span {
-    display: block !important; /* Cada parte del texto en su propia línea */
-    white-space: nowrap !important; /* Evita divisiones de palabras */
-    font-size: inherit !important; /* Asegura que el tamaño de la fuente sea el mismo */
-}
 
 .sr-only {
     position: absolute;
@@ -82,6 +70,7 @@ div.signup-toggle-panel.signup-toggle-left h1.portuguese-title span {
     font-size: 12px;
     padding: 10px 45px;
     border: 1px solid transparent;
+    border-radius: 8px;
     font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -310,33 +299,86 @@ input::placeholder {
     color: #aaa; /* Color del placeholder */
 }
 
+
+
+
+
+
+/* #########################################################################
+############################## ABA LOG IN ##################################
+######################################################################### */
+/* -----------------------------
+---------- Login Title ---------
+----------------------------- */
+#login-title {
+    text-align: center;
+    font-weight: bold; /* Asegura que el peso sea igual al de 'Create Account' */
+    line-height: 1.2; /* Opcional: ajusta el espaciado entre líneas si es necesario */
+    white-space: pre-line; /* Respeta los saltos de línea (\n) */
+}
+/* -----------------------------
+------------ Forms -------------
+----------------------------- */
+#formRegisterUsername {
+    width: 180px;
+    border-radius: 8px;
+}
+#formRegisterPassword {
+    width: 180px;
+    border-radius: 8px;
+}
+/* -----------------------------
+------------ Buttons -----------
+----------------------------- */
+#logInButton{
+    width: 180px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+#googleLoginButton {
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;            /* Activa Flexbox */
+    align-items: center;      /* Centra verticalmente los hijos */   
+    width: 180px;
+    display: flex;             /* Activa Flexbox */
+    justify-content: center;   /* Centra horizontalmente (si es necesario) */
+    gap: 8px;                  /* Espaciado entre la imagen y el texto */
+}
+.google-login-button img {
+    width: 30px;
+    height: 30px;
+}
+.google-login-button span {
+    width: 100px;
+    font-size: 12px;
+    white-space: pre-wrap; /* Permite saltos de línea y ajusta el texto automáticamente */
+    text-align: center;    /* Asegura que el texto esté centrado */
+}
 div.signup-sign-in .forgot-password-button {
     font-size: 8px; /* Tamaño más pequeño */
     line-height: 1.2; /* Espaciado entre líneas */
-    text-align: center; /* Centra el texto */
     padding: 5px 5px; /* Ajusta el padding */
+    width: 180px;
+    text-align: center; /* Centra el texto */
 }
-
 .forgot-password-button span {
     display: block; /* Asegura que cada línea esté en un bloque separado */
 }
-
 .forgot-password-button:hover {
     text-decoration: underline; /* Opcional: subrayar al pasar el cursor */
 }
 
-#login-title {
-    text-align: center;
-    margin: 0 auto;
-    font-size: 2rem !important; /* Asegura que el tamaño sea igual al de 'Create Account' */
-    font-weight: bold !important; /* Asegura que el peso sea igual al de 'Create Account' */
-    line-height: 1.2; /* Opcional: ajusta el espaciado entre líneas si es necesario */
+/* #########################################################################
+############################ ABA HI FRIEND #################################
+######################################################################### */
+
+.signup-toggle-panel.signup-toggle-right{
+    white-space: pre-wrap; /* Permite saltos de línea y ajusta el texto automáticamente */
 }
-
-/* #############################
-##### Styles das bandeiras #####
-############################# */
-
+/* -----------------------------
+----- Styles das bandeiras -----
+----------------------------- */
 .unique-language-buttons {
     all: unset; /* Resetea todos los estilos heredados */
     display: flex;
@@ -344,7 +386,6 @@ div.signup-sign-in .forgot-password-button {
     align-items: center;
     gap: 10px;
 }
-
 .unique-language-buttons button {
     all: unset; /* Resetea estilos específicos */
     background: none;
@@ -361,15 +402,169 @@ div.signup-sign-in .forgot-password-button {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease-in-out;
 }
-
 .unique-language-buttons button:hover {
     transform: scale(1.1);
 }
-
 .unique-language-buttons img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
+/* -----------------------------
+---------- Login Title ---------
+----------------------------- */
+#enterDetails {
+    margin-bottom: 45px;
+}
+#register {
+    padding-left: 0px;
+    padding-right: 0px;
+    width: 180px;
+}
 
-/* ############################# */
+/* #########################################################################
+########################### ABA WELCOME BACK ###############################
+######################################################################### */
+
+.signup-toggle-panel.signup-toggle-left h1{
+    width: 200px;
+    font-size: 32px;
+    margin-bottom: 0px;
+    margin-top: 103px;
+}
+
+.signup-toggle-panel.signup-toggle-left #enterLanguage {
+    margin-top: 70px;
+    margin-bottom: 20px;
+}
+.signup-toggle-panel.signup-toggle-left #enterDetails {
+    height: 60px;
+    margin-bottom: 40px;
+}
+
+.signup-toggle-panel.signup-toggle-left #register {
+    margin-bottom: 57px;
+}
+
+.signup-toggle-panel.signup-toggle-left #login {
+    margin-top: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 170px;
+}
+#login{
+    width: 180px;
+}
+
+/* #########################################################################
+########################## ABA CREATE ACCOUNT ##############################
+######################################################################### */
+
+/* -----------------------------
+------------ Forms -------------
+----------------------------- */
+#formRegisterUsername{
+    width: 180px;
+    border-radius: 8px;
+}
+#formRegisterEmail{
+    width: 180px;
+    border-radius: 8px;
+}
+#formRegisterPassword{
+    width: 180px;
+    border-radius: 8px;
+}
+#formRegisterConfirmPassword{
+    width: 180px;
+    border-radius: 8px;
+}
+#signUpButton{
+    width: 180px;
+}
+
+/* #########################################################################
+############################### POP UP REENVIO EMAIL #######################
+######################################################################### */
+.popup-overlay {
+    position: fixed; /* Fijo respecto a la ventana del navegador */
+    top: 750px; /* Centrado verticalmente ajustado */
+    left: 108px; /* Centrado horizontalmente ajustado */
+    transform: translate(-50%, -50%); /* Ajusta el punto de referencia al centro */
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1000; /* Asegura que esté sobre otros elementos */
+    width: 180px;
+    height: 150px;
+    display: flex; /* Activa flexbox */
+    flex-direction: column; /* Asegura que los hijos se apilen verticalmente */
+    justify-content: center; /* Centra los elementos verticalmente */
+    align-items: center; /* Centra los elementos horizontalmente */
+}
+
+.popup-overlay .close-button {
+    position: absolute; /* Posiciona el botón dentro del popup */
+    top: 10px; /* Distancia desde el borde superior del popup */
+    right: 10px; /* Distancia desde el borde derecho del popup */
+    cursor: pointer;
+}
+
+#popupMessage {
+    margin-top: 0px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    line-height: 12px;
+    text-align: center; /* Centra el texto del mensaje */
+    width: 140px;
+    height: 70px;
+    padding-left: 15px;
+    padding-bottom: 0px;
+}
+
+#popupButtonMail {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: blue;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 150px;
+    font-size: 7px;
+    text-align: center; /* Centra el texto dentro del botón */
+    align-self: center; /* Centra el botón dentro del contenedor flex */
+}
+
+#popupButtonClose {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 150px;
+    font-size: 7px;
+    text-align: center; /* Centra el texto dentro del botón */
+    align-self: center; /* Centra el botón dentro del contenedor flex */
+}
+
+#button-disabled {
+    opacity: 0.6;
+    text-align: center;
+    align-self: center;
+    font-size: 10px;
+    padding: 10px 20px;
+    margin-top: 0px;
+}
+
+#button-enabled {
+    opacity: 1;
+    text-align: center;
+    align-self: center;
+    font-size: 10px;
+    padding: 10px 20px;
+    margin-top: 0px;
+}
