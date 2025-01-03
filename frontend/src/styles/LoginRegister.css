@@ -488,21 +488,20 @@ div.signup-sign-in .forgot-password-button {
 ######################################################################### */
 .popup-overlay {
     position: fixed; /* Fijo respecto a la ventana del navegador */
-    top: 50%; /* Centrado verticalmente */
-    left: 50%; /* Centrado horizontalmente */
+    top: 750px; /* Centrado verticalmente ajustado */
+    left: 108px; /* Centrado horizontalmente ajustado */
     transform: translate(-50%, -50%); /* Ajusta el punto de referencia al centro */
     background-color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     padding: 20px;
     border-radius: 10px;
     z-index: 1000; /* Asegura que esté sobre otros elementos */
-    left: 108px;
-    height: 150px;
-    top: 750px;
     width: 180px;
-    margin-bottom: 0px;
-    margin-top: 0px;
-
+    height: 150px;
+    display: flex; /* Activa flexbox */
+    flex-direction: column; /* Asegura que los hijos se apilen verticalmente */
+    justify-content: center; /* Centra los elementos verticalmente */
+    align-items: center; /* Centra los elementos horizontalmente */
 }
 
 .popup-overlay .close-button {
@@ -511,29 +510,61 @@ div.signup-sign-in .forgot-password-button {
     right: 10px; /* Distancia desde el borde derecho del popup */
     cursor: pointer;
 }
-#popupMessage{
-    margin-top: 10px;
-    margin-bottom: 10px;
-    font-size: 8px;
-    line-height: 10px;
+
+#popupMessage {
+    margin-top: 0px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    line-height: 12px;
+    text-align: center; /* Centra el texto del mensaje */
+    width: 140px;
+    height: 70px;
+    padding-left: 15px;
+    padding-bottom: 0px;
 }
-#popupButtonMail{
+
+#popupButtonMail {
     margin-top: 10px;
     padding: 5px 10px;
-    background-color: blue;color: white;
+    background-color: blue;
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     width: 150px;
     font-size: 7px;
-}   
-#popupButtonClose{
+    text-align: center; /* Centra el texto dentro del botón */
+    align-self: center; /* Centra el botón dentro del contenedor flex */
+}
+
+#popupButtonClose {
     margin-top: 10px;
     padding: 5px 10px;
     background-color: red;
-    color: white; border: none;
+    color: white;
+    border: none;
     border-radius: 5px;
     cursor: pointer;
     width: 150px;
     font-size: 7px;
-}   
+    text-align: center; /* Centra el texto dentro del botón */
+    align-self: center; /* Centra el botón dentro del contenedor flex */
+}
+
+#button-disabled {
+    opacity: 0.6;
+    text-align: center;
+    align-self: center;
+    font-size: 10px;
+    padding: 10px 20px;
+    margin-top: 0px;
+}
+
+#button-enabled {
+    opacity: 1;
+    text-align: center;
+    align-self: center;
+    font-size: 10px;
+    padding: 10px 20px;
+    margin-top: 0px;
+}

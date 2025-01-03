@@ -223,13 +223,12 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
-# LOGGING CONFIGURATION
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
+            'format': '{levelname} {asctime} {module} {name} {message}',
             'style': '{',
         },
         'simple': {
@@ -240,11 +239,16 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',  # Usa el formato detallado
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'app.log',
+            'formatter': 'verbose',
         },
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['console', 'file'],
         'level': 'DEBUG',
     },
     'loggers': {
@@ -255,17 +259,17 @@ LOGGING = {
         },
         'django.request': {
             'handlers': ['console'],
-            'level': 'ERROR',  # Solo errores críticos de Django
+            'level': 'WARNING',
             'propagate': False,
         },
-        'social_django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',  # Nivel detallado para social_django
+        'resend_verification': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
             'propagate': False,
         },
-        'authlib': {
+        'django.db.backends': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # Si usas authlib, activa también sus logs
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
