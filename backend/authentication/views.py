@@ -141,27 +141,49 @@ class VerifyEmailView(APIView):
 #####################################################################################################################################
 ################################################# REENVIAR VERIFICACION EMAIL #######################################################
 #####################################################################################################################################
+# Configurar el logger
+logger = logging.getLogger(__name__)
+
 class ResendVerificationEmailView(APIView):
     throttle_classes = [ResendEmailRateThrottle]
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get("email")
+        username = request.data.get("username")
+        logging.info("Inicio de solicitud para reenviar correo de verificación.")
+        logging.debug(f"Datos recibidos: {request.data}")
+
+        if not username:
+            logging.error("El campo 'username' está vacío.")
+            return Response(
+                {"error": "El campo 'username' no puede estar vacío."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(username=username)
             if user.is_active:
+                logging.info(f"Usuario {username} ya está activo.")
                 return Response(
                     {"error": "La cuenta ya está activa."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            if not user.email:
+                logging.error(f"El usuario {username} no tiene un email registrado.")
+                return Response(
+                    {"error": "El usuario no tiene un email registrado."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             RegisterView().send_verification_email(user)
+            logging.info(f"Correo reenviado al usuario: {username} ({user.email}).")
             return Response(
                 {"message": "Correo de verificación reenviado exitosamente."},
                 status=status.HTTP_200_OK
             )
         except User.DoesNotExist:
+            logging.error(f"No existe un usuario con el username: {username}")
             return Response(
-                {"error": "No existe un usuario con este correo."},
+                {"error": "No existe un usuario con este username."},
                 status=status.HTTP_404_NOT_FOUND
             )
 

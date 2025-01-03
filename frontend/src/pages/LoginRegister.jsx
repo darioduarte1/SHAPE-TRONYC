@@ -30,7 +30,7 @@ const LoginRegister = () => {
       accountCreated: "Account created successfully. Please check your email to verify your account.",
       passwordsMismatch: "Passwords do not match.",
       invalidCredentials: "Invalid credentials.",
-      resendVerificationEmail: "Resend confirmation email",
+      resendVerificationEmail: "Resend email",
       errorOccured: "An error occurred. Please try again.",
       createAccount: "Create Account",
       username: "Username",
@@ -54,7 +54,7 @@ const LoginRegister = () => {
       accountCreated: "Cuenta creada exitosamente. Revisa tu correo para verificar tu cuenta.",
       passwordsMismatch: "Las contraseñas no coinciden.",
       invalidCredentials: "Credenciales inválidas.",
-      resendVerificationEmail: "Reenviar correo de confirmación",
+      resendVerificationEmail: "Reenviar correo",
       errorOccured: "Ocurrió un error. Por favor intenta nuevamente.",
       createAccount: "Crear Cuenta",
       username: "Usuario",
@@ -78,7 +78,7 @@ const LoginRegister = () => {
       accountCreated: "Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.",
       passwordsMismatch: "As senhas não coincidem.",
       invalidCredentials: "Credenciais inválidas.",
-      resendVerificationEmail: "Reenviar email de confirmação",
+      resendVerificationEmail: "Reenviar email",
       errorOccured: "Ocorreu um erro. Por favor, tente novamente.",
       createAccount: "Criar Conta",
       username: "Utilizador",
@@ -202,8 +202,13 @@ const LoginRegister = () => {
   /**********************************************************************************************************************************
   *********************************************** REENVIO DE EMAIL CONFIRMACION *****************************************************
   **********************************************************************************************************************************/
-  // Función para reenviar el correo de verificación
-  const resendVerificationEmail = async (email) => {
+  const resendVerificationEmail = async (username) => {
+    if (!username) {
+      console.warn("El username no puede estar vacío.");
+      toast.error("El username no puede estar vacío.");
+      return; // Detén la ejecución si el username es nulo o vacío
+    }
+
     if (resendCooldown) {
       console.warn("Intento bloqueado: cooldown activo.");
       return; // Bloquear nuevas solicitudes si el cooldown está activo
@@ -213,7 +218,7 @@ const LoginRegister = () => {
       const response = await fetch(`${API_BASE_URL}/auth/resend-verification/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ username }),
       });
 
       if (response.ok) {
@@ -222,7 +227,8 @@ const LoginRegister = () => {
       } else if (response.status === 429) {
         toast.error("Demasiados intentos. Por favor, espera un momento.");
       } else {
-        toast.error("Error al reenviar el correo. Por favor, inténtalo de nuevo.");
+        const data = await response.json();
+        toast.error(data.error || "Error al reenviar el correo. Por favor, inténtalo de nuevo.");
       }
     } catch (error) {
       console.error("Error al reenviar el correo:", error);
@@ -423,39 +429,25 @@ const LoginRegister = () => {
               <div className="popup-overlay">
                 <div className="popup">
                   <p id="popupMessage">{popupMessage}</p>
-                  <button
-                    id="popupButtonMail"
-                    onClick={() => resendVerificationEmail(formData.email)}
-                    disabled={resendCooldown}
-                    style={{
-                      marginTop: "10px",
-                      padding: "5px 10px",
-                      backgroundColor: resendCooldown ? "gray" : "blue",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "5px",
-                      cursor: resendCooldown ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    {resendCooldown
-                      ? `Reenviar email de confirmação (${secondsLeft}s)`
-                      : "Reenviar email de confirmação"}
-                  </button>
-                  <button
-                    id="popupButtonClose"
-                    onClick={() => setShowPopup(false)} // Cierra el popup
-                    style={{
-                      marginTop: "10px",
-                      padding: "5px 10px",
-                      backgroundColor: "red",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Cerrar
-                  </button>
+                  <div className="button-container">
+                    <button
+                      id={resendCooldown ? "button-disabled" : "button-enabled"} // Atributo id dinámico
+                      onClick={() => resendVerificationEmail(formData.username)} // Usa el username en lugar del email
+                      disabled={resendCooldown}
+                      style={{
+                        padding: "10px 20px",
+                        backgroundColor: resendCooldown ? "gray" : "blue",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: resendCooldown ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {resendCooldown
+                        ? `Reenviar email (${secondsLeft}s)` // Mostrar temporizador si está activo
+                        : t.resendVerificationEmail}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
