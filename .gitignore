@@ -44,3 +44,5 @@ venv/
 certs/localhost+2-key.pem
 .env
 send_test.py
+
+SHAPE-TRONYC-CLEAN/
