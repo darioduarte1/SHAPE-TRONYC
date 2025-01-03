@@ -230,10 +230,6 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {name} {message}',
-            'style': '{',
-        },
         'simple': {
             'format': '{levelname} {message}',
             'style': '{',
@@ -242,37 +238,23 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+            'formatter': 'simple',
         },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': 'app.log',
-            'formatter': 'verbose',
-        },
-    },
-    'root': {
-        'handlers': ['console', 'file'],
-        'level': 'DEBUG',
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
+            'level': 'INFO',  # Muestra solo mensajes de nivel INFO o superiores
+            'propagate': False,
         },
         'django.request': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': 'WARNING',  # Solo advertencias y errores
             'propagate': False,
         },
-        'resend_verification': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'django.db.backends': {
+        'urllib3': {  # Reducir mensajes de depuración de urllib3
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'propagate': False,
         },
     },

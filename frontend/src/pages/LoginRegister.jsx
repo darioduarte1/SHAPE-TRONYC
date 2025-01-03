@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import "../styles/LoginRegister.css";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-
 
 const LoginRegister = () => {
   const [isActive, setIsActive] = useState(false);
   const [isPartner, setIsPartner] = useState(false);
   const [language, setLanguage] = useState("en");
-  const [toastShown, setToastShown] = useState(false); // Nuevo estado para evitar duplicados
+  const [loading, setLoading] = useState(false);
+  const toasterShown = useRef(false);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -18,13 +19,13 @@ const LoginRegister = () => {
     confirmPassword: "",
   });
   const navigate = useNavigate();
-  const location = useLocation(); // Capturar ubicación actual para manejar parámetros
 
   /**********************************************************************************************************************************
   ****************************************************** TRADUCOES ******************************************************************
   **********************************************************************************************************************************/
   const translations = useMemo(() => ({
     en: {
+      accountCreatedSuccess: "User successfully created! You can now use the Login with Google button to access your account.",
       accountActivated: "Your account has been successfully activated. You can now log in!",
       invalidOrExpiredToken: "Invalid or expired token. Please try again.",
       googleRegister: "Sign Up\nwith Google",
@@ -51,6 +52,7 @@ const LoginRegister = () => {
       forgotPassword: "Forgot your password?",
     },
     es: {
+      accountCreatedSuccess: "Usuario creado con éxito. ¡Ahora puedes usar el botón de Iniciar sesión con Google para acceder a tu cuenta!",
       accountActivated: "Tu cuenta ha sido activada exitosamente. ¡Ahora puedes iniciar sesión!",
       invalidOrExpiredToken: "Token inválido o expirado. Por favor, intenta nuevamente.",
       googleRegister: "Regístrate\ncon Google",
@@ -77,6 +79,7 @@ const LoginRegister = () => {
       forgotPassword: "¿Olvidaste tu contraseña?",
     },
     pt: {
+      accountCreatedSuccess: "Usuário criado com êxito! Já podes usar o botão de Iniciar secção com Google para entrares na tua conta",
       accountActivated: "Sua conta foi ativada com sucesso. Agora você pode fazer login!",
       invalidOrExpiredToken: "Token inválido ou expirado. Por favor, tente novamente.",
       googleRegister: "Regista-te\ncom Google",
@@ -107,40 +110,82 @@ const LoginRegister = () => {
   const t = translations[language];
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const status = urlParams.get("status");
-    const userLanguage = urlParams.get("language") || "en";
-  
-    // Verificar si ya se mostró el toaster en esta sesión
-    const hasToastShown = sessionStorage.getItem("toastShown");
-  
-    if (!hasToastShown && (status === "success" || status === "error")) {
-      setLanguage(userLanguage);
-  
-      if (status === "success") {
-        toast.info(translations[userLanguage]?.accountActivated || translations.en.accountActivated, {
-          autoClose: 10000,
-          position: "bottom-center",
-        });
-      } else if (status === "error") {
-        toast.error(translations[userLanguage]?.invalidOrExpiredToken || translations.en.invalidOrExpiredToken, {
-          autoClose: 10000,
-          position: "bottom-center",
-        });
-      }
-  
-      // Marcar como mostrado en sessionStorage
-      sessionStorage.setItem("toastShown", "true");
-  
-      // Limpiar los parámetros de la URL
-      setTimeout(() => {
-        navigate("/auth", { replace: true });
-      }, 100); // Pequeño retraso para evitar conflictos.
+    // Verificar si ya existe un idioma en localStorage
+    const storedLanguage = localStorage.getItem("language");
+    
+    if (!storedLanguage) {
+      // Si no existe, establece el idioma predeterminado (inglés)
+      localStorage.setItem("language", "en");
+      console.log("No language found in localStorage. Setting default to 'en'.");
+      setLanguage("en"); // Actualiza el estado del componente al idioma predeterminado
+    } else {
+      // Si existe un idioma, sincroniza el estado con el valor en localStorage
+      setLanguage(storedLanguage);
+      console.log("Language found in localStorage:", storedLanguage);
     }
-  }, [location.search, translations, navigate]);
-  
-  
-  
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    const userId = params.get("user_id");
+    const userLanguage = params.get("language"); // Obtener el idioma desde los parámetros
+
+    if (accessToken && refreshToken && userId && userLanguage) {
+      localStorage.setItem("access", accessToken);
+      localStorage.setItem("refresh", refreshToken);
+      localStorage.setItem("user_id", userId);
+      localStorage.setItem("language", userLanguage); // Almacenar el idioma en localStorage
+      console.log("Language received from backend:", userLanguage);
+      localStorage.setItem("show_toaster", "true");
+
+      window.history.replaceState({}, document.title, "/auth");
+    } else {
+      const storedAccessToken = localStorage.getItem("access");
+      const storedRefreshToken = localStorage.getItem("refresh");
+
+      if (!storedAccessToken || !storedRefreshToken) {
+        navigate("/auth");
+      }
+    }
+    setLoading(false);
+  }, [navigate]);
+
+  useEffect(() => {
+    const userLanguage = localStorage.getItem("language") || "en";
+
+    // Agrega un log para confirmar el idioma del toaster
+    console.log("Toaster language:", userLanguage);
+
+    if (!toasterShown.current && localStorage.getItem("show_toaster") === "true") {
+      toasterShown.current = true; // Marca el toaster como mostrado
+      console.log("Displaying toaster...");
+
+      setTimeout(() => {
+        toast.success(
+          translations[userLanguage]?.accountCreatedSuccess || t.accountCreatedSuccess,
+          { autoClose: 10000 }
+        );
+        localStorage.removeItem("show_toaster");
+        console.log("Toaster displayed and flag removed");
+      }, 1000);
+    }
+  }, [translations, t]);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      console.log("Storage changed:", localStorage.getItem("show_toaster"));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -148,7 +193,9 @@ const LoginRegister = () => {
   };
 
   const handleLanguageChange = (lang) => {
-    setLanguage(lang);
+    setLanguage(lang); // Actualiza el estado del componente
+    localStorage.setItem("language", lang); // Actualiza el idioma en localStorage
+    console.log(`Language updated to: ${lang} and saved to localStorage.`);
   };
 
   const handleRegisterClick = () => setIsActive(true);
@@ -275,23 +322,23 @@ const LoginRegister = () => {
   **********************************************************************************************************************************/
   const login = async () => {
     console.log("Datos enviados para login:", formData);
-  
+
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: formData.username, password: formData.password }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         console.log("Login exitoso:", data);
-  
+
         // Guardar tokens en localStorage
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
-  
+
         // Guardar el idioma del usuario en localStorage desde la base de datos
         if (data.language) {
           localStorage.setItem("language", data.language);
@@ -301,33 +348,33 @@ const LoginRegister = () => {
           localStorage.setItem("language", "en");
           console.warn("Idioma no especificado, configurado a inglés por defecto.");
         }
-  
+
         // Guardar el user_id si está disponible
         if (data.user_id) {
           localStorage.setItem("user_id", data.user_id);
         }
-  
+
         // Redirigir al home
         navigate("/home");
       } else if (response.status === 403) {
         console.error("Usuario inactivo:", data);
-  
+
         const userLanguage = data.language || "en"; // Usar idioma si está disponible o inglés por defecto
-  
+
         setPopupMessage(
           translations[userLanguage]?.emailVerificationPending ||
-            "Sua conta não foi verificada! Por favor, verifique seu email."
+          "Sua conta não foi verificada! Por favor, verifique seu email."
         );
         setShowPopup(true);
       } else {
         console.error("Credenciales inválidas:", data);
-  
+
         // Mostrar error basado en idioma seleccionado
         toast.error(data.error || translations[language]?.invalidCredentials || "Credenciais inválidas.");
       }
     } catch (error) {
       console.error("Error en el login:", error);
-  
+
       // Mostrar error genérico basado en idioma seleccionado
       toast.error(translations[language]?.errorOccured || "Ocorreu um erro.");
     }
@@ -363,21 +410,26 @@ const LoginRegister = () => {
   *************************************************** REGISTRO CON GOOGLE ***********************************************************
   **********************************************************************************************************************************/
   const googleRegister = () => {
-    const googleRegisterUrl = "https://127.0.0.1:8000/auth/oauth2/login/google/";
-    window.location.href = googleRegisterUrl;
+    console.log("Generated Google Register URL:", `${API_BASE_URL}/auth/oauth2/login/google/?language=${language}`);
+    sessionStorage.setItem("temporary_language", language); // Almacena temporalmente el idioma
+    window.location.href = `${API_BASE_URL}/auth/oauth2/login/google/?language=${language}`;
   };
 
   /**********************************************************************************************************************************
   ***************************************************** LOGIN CON GOOGLE ************************************************************
   **********************************************************************************************************************************/
   const googleLogin = () => {
-    const googleLoginUrl = "https://127.0.0.1:8000/auth/oauth2/login/google/";
+    const googleLoginUrl = `${API_BASE_URL}/auth/oauth2/login/google/`;
     window.location.href = googleLoginUrl;
   };
 
   /**********************************************************************************************************************************
   *********************************************************** HTML ******************************************************************
   **********************************************************************************************************************************/
+  if (loading) {
+    return <div className="spinner">Cargando...</div>;
+  }
+
   return (
     <div className="signup-body">
       <div className={`signup-container ${isActive ? "signup-active" : ""}`} id="container">

@@ -26,11 +26,7 @@ from .throttles import ResendEmailRateThrottle
 import logging
 from backend.profiles.models import UserProfile
 from django.contrib.auth.hashers import check_password
-
-
-
-
-
+from .services.google_auth import fetch_user_info
 
 
 User = get_user_model()
@@ -38,6 +34,8 @@ User = get_user_model()
 #####################################################################################################################################
 ######################################################### VERIFICAR TOKEN ###########################################################
 #####################################################################################################################################
+
+
 def verify_token(uidb64, token):
     """Verifica un token generado para la activación del usuario."""
     try:
@@ -70,12 +68,14 @@ class RegisterView(APIView):
             try:
                 self.send_verification_email(user)
                 return Response(
-                    {"message": _("Usuario registrado exitosamente. Verifica tu correo para activar la cuenta.")},
+                    {"message": _(
+                        "Usuario registrado exitosamente. Verifica tu correo para activar la cuenta.")},
                     status=status.HTTP_201_CREATED,
                 )
             except (BadHeaderError, SMTPException) as e:
                 return Response(
-                    {"error": _("No se pudo enviar el correo de verificación. Contacta al soporte.")},
+                    {"error": _(
+                        "No se pudo enviar el correo de verificación. Contacta al soporte.")},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
         else:
@@ -92,7 +92,7 @@ class RegisterView(APIView):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         activation_link = f"{settings.PROTOCOL}://{settings.DEFAULT_DOMAIN}/auth/verify-email/{uid}/{token}/"
-        
+
         # Log para verificar el enlace generado
         logging.debug(f"Generated activation link: {activation_link}")
 
@@ -129,6 +129,8 @@ class RegisterView(APIView):
 #####################################################################################################################################
 ##################################################### VERIFICATION EMAIL ############################################################
 #####################################################################################################################################
+
+
 class VerifyEmailView(APIView):
     """Vista para manejar la verificación del correo electrónico."""
     permission_classes = [AllowAny]
@@ -150,20 +152,24 @@ class VerifyEmailView(APIView):
         redirect_url = f"{settings.FRONTEND_HOME_URL}/auth?status=error"
         return redirect(redirect_url)
 
+
 #####################################################################################################################################
 ################################################# REENVIAR VERIFICACION EMAIL #######################################################
 #####################################################################################################################################
 # Configurar el logger
 logger = logging.getLogger(__name__)
 
+
 class ResendVerificationEmailView(APIView):
 
     throttle_classes = [ResendEmailRateThrottle]
-    permission_classes = [AllowAny]  # Esto permite acceso a todos, autenticados o no.
+    # Esto permite acceso a todos, autenticados o no.
+    permission_classes = [AllowAny]
 
     def post(self, request):
         username = request.data.get("username")
-        logging.info("Inicio de solicitud para reenviar correo de verificación.")
+        logging.info(
+            "Inicio de solicitud para reenviar correo de verificación.")
         logging.debug(f"Datos recibidos: {request.data}")
 
         if not username:
@@ -188,10 +194,12 @@ class ResendVerificationEmailView(APIView):
             verification_url = f"{settings.PROTOCOL}://{settings.DEFAULT_DOMAIN}/auth/verify-email/{uid}/{token}/"
 
             # Agregar el print para depuración
-            print(f"Verification URL: {verification_url}")  # Para verificar en los logs
+            # Para verificar en los logs
+            print(f"Verification URL: {verification_url}")
 
             RegisterView().send_verification_email(user)
-            logging.info(f"Correo reenviado al usuario: {username} ({user.email}).")
+            logging.info(
+                f"Correo reenviado al usuario: {username} ({user.email}).")
             return Response(
                 {"message": "Correo de verificación reenviado exitosamente."},
                 status=status.HTTP_200_OK
@@ -206,6 +214,8 @@ class ResendVerificationEmailView(APIView):
 #####################################################################################################################################
 ######################################################### LOGIN #####################################################################
 #####################################################################################################################################
+
+
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -257,7 +267,6 @@ class LoginView(APIView):
         )
 
 
-
 #####################################################################################################################################
 ######################################################### LOGOUT ####################################################################
 #####################################################################################################################################
@@ -279,6 +288,8 @@ class LogoutView(APIView):
 #####################################################################################################################################
 #################################################### CHANGE PASSWORD ################################################################
 #####################################################################################################################################
+
+
 class ChangePasswordView(APIView):
     """Vista para cambiar la contraseña del usuario."""
     permission_classes = [IsAuthenticated]
@@ -311,6 +322,8 @@ class ChangePasswordView(APIView):
 #####################################################################################################################################
 #################################################### PROTECTED VIEW #################################################################
 #####################################################################################################################################
+
+
 class ProtectedView(APIView):
     """Vista para rutas protegidas."""
     permission_classes = [IsAuthenticated]
@@ -323,10 +336,15 @@ class ProtectedView(APIView):
 ################################################### VISTA LOGIN VIEW ################################################################
 #####################################################################################################################################
 class GoogleLoginView(APIView):
-    """Vista para manejar el inicio de sesión con Google."""
+    """Vista para iniciar sesión con Google."""
     permission_classes = [AllowAny]
 
     def get(self, request):
+        # Guardar el idioma temporalmente
+        selected_language = request.GET.get("language", "en")
+        request.session["temporary_language"] = selected_language
+
+        # Redirigir al flujo de Google
         google_auth_url = "https://accounts.google.com/o/oauth2/auth"
         params = {
             "client_id": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,
@@ -342,8 +360,9 @@ class GoogleLoginView(APIView):
 #####################################################################################################################################
 ################################################### CALL BACK DE GOOGLE #############################################################
 #####################################################################################################################################
+
+
 class GoogleCallbackView(APIView):
-    """Vista para manejar la callback de Google."""
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -351,44 +370,65 @@ class GoogleCallbackView(APIView):
         if not authorization_code:
             return Response({"error": "Authorization code not provided"}, status=400)
 
-        # Exchange authorization code for tokens
-        token_url = "https://oauth2.googleapis.com/token"
-        token_data = {
-            "code": authorization_code,
-            "client_id": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,
-            "client_secret": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET,
-            "redirect_uri": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI,
-            "grant_type": "authorization_code",
-        }
-        token_response = requests.post(token_url, data=token_data)
-        if token_response.status_code != 200:
-            return Response({"error": "Failed to fetch access token from Google"}, status=500)
+        # Intercambiar el código de autorización por tokens
+        tokens = exchange_authorization_code_for_tokens(authorization_code)
+        print("Tokens:", tokens)
 
-        tokens = token_response.json()
+        # Obtener información del usuario
+        user_info = fetch_user_info(tokens['access_token'])
+        print("User Info:", user_info)
 
-        # Fetch user info using the access token
-        user_info_url = "https://www.googleapis.com/oauth2/v1/userinfo"
-        user_info_response = requests.get(
-            user_info_url, headers={"Authorization": f"Bearer {tokens['access_token']}"}
-        )
-        if user_info_response.status_code != 200:
-            return Response({"error": "Failed to fetch user info from Google"}, status=500)
+        if not user_info.get("email"):
+            return Response({"error": "Email not provided"}, status=400)
 
-        user_info = user_info_response.json()
+        # Obtener el idioma desde los parámetros de la URL
+        language = request.session.get(
+            "temporary_language") or request.GET.get('language', 'en')
+        print("Language received in callback:", language)
 
-        # Get or create a user
+        # Validar que el idioma sea uno permitido
+        if language not in ['en', 'es', 'pt']:
+            language = 'en'
+            print("Invalid language received. Defaulting to:", language)
+
+        # Crear o recuperar al usuario
         user, created = User.objects.get_or_create(
             email=user_info["email"],
             defaults={
                 "first_name": user_info.get("given_name", ""),
                 "last_name": user_info.get("family_name", ""),
+                "username": user_info["email"],
+                "language": language,  # Guardar idioma recibido
             },
         )
 
-        # Generate JWT tokens
-        jwt_tokens = get_tokens_for_user(user)
+        # Si el usuario ya existía, actualiza su idioma
+        if not created:
+            if user.language != language:
+                user.language = language
+                user.save()
+                print(f"User language updated to: {user.language}")
 
-        # Redirect to frontend with tokens
-        frontend_url = settings.FRONTEND_HOME_URL  # Set this in your Django settings
-        redirect_url = f"{frontend_url}?access_token={jwt_tokens['access']}&refresh_token={jwt_tokens['refresh']}"
+        if created:
+            user.is_active = True
+            user.save()
+            print(f"New user created: {user.email}, Language: {user.language}")
+
+        # Debugging antes de redirigir
+        print("Access Token:", tokens['access_token'])
+        print("Refresh Token:", tokens['refresh_token'])
+        print("User ID:", user.id)
+        print("Language (user):", user.language)
+
+        # Redirigir al frontend con todos los datos necesarios
+        frontend_url = settings.FRONTEND_HOME_URL
+        redirect_url = (
+            f"{frontend_url}/auth"
+            f"?access_token={tokens['access_token']}"
+            f"&refresh_token={tokens['refresh_token']}"
+            f"&user_id={user.id}"
+            f"&language={user.language}&status=success"
+        )
+
+        print("Redirect URL:", redirect_url)
         return redirect(redirect_url)
