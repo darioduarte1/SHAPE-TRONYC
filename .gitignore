@@ -39,3 +39,6 @@ venv/
 .vscode/
 *.swp
 .vercelsend_test.py
+send_test.py
+.env
+certs/localhost+2-key.pem
