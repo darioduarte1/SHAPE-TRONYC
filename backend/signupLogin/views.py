@@ -333,36 +333,9 @@ class ProtectedView(APIView):
 
 
 #####################################################################################################################################
-################################################### VISTA LOGIN VIEW ################################################################
+################################################## GOOGLE LOGIN CALL BACK ###########################################################
 #####################################################################################################################################
-class GoogleLoginView(APIView):
-    """Vista para iniciar sesión con Google."""
-    permission_classes = [AllowAny]
-
-    def get(self, request):
-        # Guardar el idioma temporalmente
-        selected_language = request.GET.get("language", "en")
-        request.session["temporary_language"] = selected_language
-
-        # Redirigir al flujo de Google
-        google_auth_url = "https://accounts.google.com/o/oauth2/auth"
-        params = {
-            "client_id": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,
-            "redirect_uri": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI,
-            "response_type": "code",
-            "scope": "email profile",
-            "access_type": "offline",
-            "prompt": "consent",
-        }
-        query_string = urlencode(params)
-        return redirect(f"{google_auth_url}?{query_string}")
-
-#####################################################################################################################################
-################################################### CALL BACK DE GOOGLE #############################################################
-#####################################################################################################################################
-
-
-class GoogleCallbackView(APIView):
+class GoogleLoginCallbackView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -372,63 +345,31 @@ class GoogleCallbackView(APIView):
 
         # Intercambiar el código de autorización por tokens
         tokens = exchange_authorization_code_for_tokens(authorization_code)
-        print("Tokens:", tokens)
 
         # Obtener información del usuario
         user_info = fetch_user_info(tokens['access_token'])
-        print("User Info:", user_info)
 
         if not user_info.get("email"):
             return Response({"error": "Email not provided"}, status=400)
 
-        # Obtener el idioma desde los parámetros de la URL
-        language = request.session.get(
-            "temporary_language") or request.GET.get('language', 'en')
-        print("Language received in callback:", language)
+        # Verificar si el usuario existe
+        try:
+            user = User.objects.get(email=user_info["email"])
+            if not user.is_active:
+                return Response({"error": "Account is inactive. Please verify your email."}, status=403)
+        except User.DoesNotExist:
+            return Response({"error": "User not found. Please register first."}, status=404)
 
-        # Validar que el idioma sea uno permitido
-        if language not in ['en', 'es', 'pt']:
-            language = 'en'
-            print("Invalid language received. Defaulting to:", language)
+        # Generar tokens
+        tokens = get_tokens_for_user(user)
 
-        # Crear o recuperar al usuario
-        user, created = User.objects.get_or_create(
-            email=user_info["email"],
-            defaults={
-                "first_name": user_info.get("given_name", ""),
-                "last_name": user_info.get("family_name", ""),
-                "username": user_info["email"],
-                "language": language,  # Guardar idioma recibido
-            },
-        )
-
-        # Si el usuario ya existía, actualiza su idioma
-        if not created:
-            if user.language != language:
-                user.language = language
-                user.save()
-                print(f"User language updated to: {user.language}")
-
-        if created:
-            user.is_active = True
-            user.save()
-            print(f"New user created: {user.email}, Language: {user.language}")
-
-        # Debugging antes de redirigir
-        print("Access Token:", tokens['access_token'])
-        print("Refresh Token:", tokens['refresh_token'])
-        print("User ID:", user.id)
-        print("Language (user):", user.language)
-
-        # Redirigir al frontend con todos los datos necesarios
+        # Redirigir al frontend con los datos necesarios
         frontend_url = settings.FRONTEND_HOME_URL
         redirect_url = (
             f"{frontend_url}/auth"
-            f"?access_token={tokens['access_token']}"
-            f"&refresh_token={tokens['refresh_token']}"
+            f"?access_token={tokens['access']}"
+            f"&refresh_token={tokens['refresh']}"
             f"&user_id={user.id}"
             f"&language={user.language}&status=success"
         )
-
-        print("Redirect URL:", redirect_url)
         return redirect(redirect_url)
