@@ -87,7 +87,7 @@ INSTALLED_APPS = [
 
     # Local apps
     'backend.profiles',
-    'backend.authentication',  # App for authentication
+    'backend.signupLogin',  # App for authentication
 ]
 
 # MIDDLEWARE CONFIGURATION
@@ -133,7 +133,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR / 'backend/authentication/templates',  # Templates directory for the authentication app
+            BASE_DIR / 'backend/signupLogin/templates',  # Templates directory for the authentication app
         ],
         'APP_DIRS': True,  # Enable templates discovery in registered apps
         'OPTIONS': {
