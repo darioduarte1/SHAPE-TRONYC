@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../styles/LoginRegister.css";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,6 +7,7 @@ import translations from "../utils/translations";
 import signupNormal from "../components/signup/signupNormal/signupNormal";
 import useCooldown from "../components/signup/signupNormal/utils/cooldown"; // Timer de cooldown para o botao de reenviar email de verificação 
 import resendVerificationEmail from "../components/signup/signupNormal/utils/resendVerificationEmail"; // Función para reenviar email de verificação
+import loginNormal from "../components/login/loginNormal/loginNormal"; // Función para hacer login de forma normal
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -20,12 +21,7 @@ const LoginRegister = () => {
   const { resendCooldown, secondsLeft, startCooldown } = useCooldown();
   const [showPopup, setShowPopup] = useState(false); // Controla la visibilidad del popup
   const [popupMessage, setPopupMessage] = useState(""); // Contiene el mensaje del popup
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [formData, setFormData] = useState({username: "", email: "", password: "", confirmPassword: ""});
   const navigate = useNavigate();
 
 
@@ -106,25 +102,33 @@ const LoginRegister = () => {
     };
   }, []);
 
+  /**********************************************************************************************************************************
+  **************************************************** MANEJO DEL SLIDER ************************************************************
+  **********************************************************************************************************************************/
+  const handleRegisterClick = () => setIsActive(true);
+  const handleLoginClick = () => setIsActive(false);
 
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
+  /**********************************************************************************************************************************
+  ************************************************* ACTUALIZACION DE LENGUAGE *******************************************************
+  **********************************************************************************************************************************/
   const handleLanguageChange = (lang) => {
     setLanguage(lang); // Actualiza el estado del componente
     localStorage.setItem("language", lang); // Actualiza el idioma en localStorage
     console.log(`Language updated to: ${lang} and saved to localStorage.`);
   };
 
-  const handleRegisterClick = () => setIsActive(true);
+  /**********************************************************************************************************************************
+  ****************************************************** SIGNUP NORMAL **************************************************************
+  **********************************************************************************************************************************/
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
-  const handleLoginClick = () => setIsActive(false);
-
+  /**********************************************************************************************************************************
+  ************************************************* MANEJO DEL TOGGLE SWITCH ********************************************************
+  **********************************************************************************************************************************/
   const handleToggleChange = () => setIsPartner(!isPartner);
-
 
   /**********************************************************************************************************************************
   *********************************************** REENVIO DE EMAIL CONFIRMACION *****************************************************
@@ -134,70 +138,11 @@ const LoginRegister = () => {
   };
 
   /**********************************************************************************************************************************
-  ********************************************************** LOGIN ******************************************************************
+  ****************************************************** LOGIN NORMAL ***************************************************************
   **********************************************************************************************************************************/
-  const login = async () => {
-    console.log("Datos enviados para login:", formData);
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: formData.username, password: formData.password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log("Login exitoso:", data);
-
-        // Guardar tokens en localStorage
-        localStorage.setItem("access", data.access);
-        localStorage.setItem("refresh", data.refresh);
-
-        // Guardar el idioma del usuario en localStorage desde la base de datos
-        if (data.language) {
-          localStorage.setItem("language", data.language);
-          console.log("Idioma guardado en localStorage:", data.language);
-        } else {
-          // Si no hay un idioma en la base de datos, guardar inglés por defecto
-          localStorage.setItem("language", "en");
-          console.warn("Idioma no especificado, configurado a inglés por defecto.");
-        }
-
-        // Guardar el user_id si está disponible
-        if (data.user_id) {
-          localStorage.setItem("user_id", data.user_id);
-        }
-
-        // Redirigir al home
-        navigate("/home");
-      } else if (response.status === 403) {
-        console.error("Usuario inactivo:", data);
-
-        const userLanguage = data.language || "en"; // Usar idioma si está disponible o inglés por defecto
-
-        setPopupMessage(
-          translations[userLanguage]?.emailVerificationPending ||
-          "Sua conta não foi verificada! Por favor, verifique seu email."
-        );
-        setShowPopup(true);
-      } else {
-        console.error("Credenciales inválidas:", data);
-
-        // Mostrar error basado en idioma seleccionado
-        toast.error(data.error || translations[language]?.invalidCredentials || "Credenciais inválidas.");
-      }
-    } catch (error) {
-      console.error("Error en el login:", error);
-
-      // Mostrar error genérico basado en idioma seleccionado
-      toast.error(translations[language]?.errorOccured || "Ocorreu um erro.");
-    }
+  const handleLogin = () => {
+    loginNormal(formData, setPopupMessage, setShowPopup, navigate, language, API_BASE_URL);
   };
-
-
-
 
   /**********************************************************************************************************************************
   *************************************************** BOTAO GOOGLE REUTILIZAVEL *****************************************************
@@ -335,7 +280,7 @@ const LoginRegister = () => {
               value={formData.password}
               onChange={handleInputChange}
             />
-            <button id="logInButton" onClick={login}>{t.logIn}</button>
+            <button id="logInButton" onClick={handleLogin}>{t.logIn}</button>
             <GoogleAuthButton mode="login" onClick={googleLogin} translations={t} />
             <button
               onClick={() => toast.info("Función no implementada.")}
