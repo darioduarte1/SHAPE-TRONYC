@@ -4,5 +4,5 @@ print("Cargando signup.urls...")
 
 urlpatterns = [
     # Otras rutas del módulo signup
-    path('oauth2/', include('backend.signupLogin.signup.signupGoogle.urls')),  # Incluye rutas de signupGoogle
+    path('oauth2/', include('backend.signupLogin.signup.signupGoogle.urls')),
 ]
