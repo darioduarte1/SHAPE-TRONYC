@@ -1,4 +1,5 @@
 from django.urls import path, include
+from django.contrib import admin
 from .views import (
     RegisterView,
     LoginView,
@@ -9,9 +10,12 @@ from .views import (
     ResendVerificationEmailView,
 )
 
+print("Cargando signupLogin.urls...")
+
 urlpatterns = [
     # Rutas para registro y autenticación
     path('register/', RegisterView.as_view(), name='register'),
+    path('signup/', include('backend.signupLogin.signup.urls')),  # Incluye rutas de signup
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('change-password/', ChangePasswordView.as_view(), name='change_password'),
@@ -20,8 +24,8 @@ urlpatterns = [
     path("verify-email/<str:uidb64>/<str:token>/", VerifyEmailView.as_view(), name="verify-email"),
     path("resend-verification/", ResendVerificationEmailView.as_view(), name="resend-verification"),
 
-    # Subrutas de `signup`
-    path('signup/', include('backend.signupLogin.signup.urls')),
+
+    
 
     # Rutas protegidas
     path('protected/', ProtectedView.as_view(), name='protected'),
