@@ -12,12 +12,11 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 
-FRONTEND_HOME_URL = "https://localhost:3000"  # Cambia esto según tu configuración
-
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = config('SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI')
+FRONTEND_HOME_URL = config('FRONTEND_HOME_URL')  # Dirección del frontend
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
