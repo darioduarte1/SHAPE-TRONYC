@@ -1,5 +1,3 @@
-# backend/authentication/utils.py
-
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import exception_handler
 

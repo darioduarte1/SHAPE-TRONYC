@@ -9,6 +9,7 @@ from django.utils.crypto import get_random_string
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model  # Importación necesaria
 from backend.profiles.models import UserProfile
+from backend.signupLogin.utils import get_tokens_for_user
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class GoogleSignupView(APIView):
             "prompt": "consent",
         }
         query_string = "&".join([f"{key}={value}" for key, value in params.items()])
-        logger.info(f"Redirigiendo a Google OAuth con la URL: {google_auth_url}?{query_string}")
+        logger.info(f"URL generada para Google: {google_auth_url}?{query_string}")
         return redirect(f"{google_auth_url}?{query_string}")
 
 # Google Callback View
@@ -40,6 +41,9 @@ class GoogleSignupCallbackView(APIView):
         if not authorization_code:
             logger.error("Código de autorización no proporcionado")
             return Response({"error": "Authorization code not provided"}, status=400)
+    
+        # Agrega un logger para depurar el código recibido
+        logger.debug(f"Código recibido en el callback: {authorization_code}")
 
         # Exchange authorization code for tokens
         token_url = "https://oauth2.googleapis.com/token"
@@ -78,7 +82,6 @@ class GoogleSignupCallbackView(APIView):
         )
 
         # Generate JWT tokens
-        from .utils import get_tokens_for_user
         jwt_tokens = get_tokens_for_user(user)
 
         # Redirect to frontend with tokens
