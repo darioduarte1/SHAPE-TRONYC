@@ -205,14 +205,14 @@ const LoginRegister = () => {
 /**********************************************************************************************************************************
 *************************************************** REGISTRO CON GOOGLE ***********************************************************
 **********************************************************************************************************************************/
-  const googleSignup = () => {
-    const apiUrl = process.env.REACT_APP_API_URL; // URL del backend
-    const selectedLanguage = language || "en"; // Idioma seleccionado
-    const googleSignupUrl = `${apiUrl}/auth/signup/oauth2/signup/google?language=${selectedLanguage}`; // Cambiar aquí
-
-    console.log("Google Signup URL generada:", googleSignupUrl);
-    window.location.href = googleSignupUrl; // Redirige al backend
-  };
+const googleSignup = () => {
+  const apiUrl = process.env.REACT_APP_API_URL; // Asegúrate de que esta variable esté configurada en el .env del frontend
+  console.log("REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
+  const googleSignupUrl = `${apiUrl}/auth/oauth2/signup/google/`;
+  console.log("Google Signup URL:", googleSignupUrl);
+  console.log("Redirigiendo a backend para Google Signup:", googleSignupUrl);
+  window.location.href = googleSignupUrl; // Redirige al backend
+};
 
 /**********************************************************************************************************************************
 ***************************************************** LOGIN CON GOOGLE ************************************************************

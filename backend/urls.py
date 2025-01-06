@@ -15,5 +15,5 @@ urlpatterns = [
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/', include('backend.profiles.urls')),
-    path('auth/', include('backend.signupLogin.urls')),  # Incluye signupLogin
+    path('auth/', include('backend.signupLogin.urls')),
 ]

@@ -46,3 +46,5 @@ certs/localhost+2-key.pem
 send_test.py
 
 SHAPE-TRONYC-CLEAN/
+
+node_modules/
