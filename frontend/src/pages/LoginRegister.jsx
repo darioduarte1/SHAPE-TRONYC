@@ -1,344 +1,187 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../styles/LoginRegister.css";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import translations from "../utils/translations";
+import signupNormal from "../components/signup/signupNormal/signupNormal";
+import useCooldown from "../components/signup/signupNormal/utils/cooldown"; // Timer de cooldown para o botao de reenviar email de verificação 
+import resendVerificationEmail from "../components/signup/signupNormal/utils/resendVerificationEmail"; // Función para reenviar email de verificação
+import loginNormal from "../components/login/loginNormal/loginNormal"; // Función para hacer login de forma normal
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-
 
 const LoginRegister = () => {
   const [isActive, setIsActive] = useState(false);
   const [isPartner, setIsPartner] = useState(false);
   const [language, setLanguage] = useState("en");
-  const [toastShown, setToastShown] = useState(false); // Nuevo estado para evitar duplicados
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const navigate = useNavigate();
-  const location = useLocation(); // Capturar ubicación actual para manejar parámetros
-
-  /**********************************************************************************************************************************
-  ****************************************************** TRADUCOES ******************************************************************
-  **********************************************************************************************************************************/
-  const translations = useMemo(() => ({
-    en: {
-      accountActivated: "Your account has been successfully activated. You can now log in!",
-      invalidOrExpiredToken: "Invalid or expired token. Please try again.",
-      googleRegister: "Sign Up\nwith Google",
-      googleLogin: "Log In\nwith Google",
-      emailVerificationPending:
-        "Your account has not been verified. Please check your inbox and spam folder! Activate the link sent!",
-      accountCreated: "Account created successfully. Please check your email to verify your account.",
-      passwordsMismatch: "Passwords do not match.",
-      invalidCredentials: "Invalid credentials.",
-      resendVerificationEmail: "Resend email",
-      errorOccured: "An error occurred. Please try again.",
-      createAccount: "Create Account",
-      username: "Username",
-      email: "Email",
-      password: "Password",
-      confirmPassword: "Confirm Password",
-      signUp: "Sign Up",
-      logIn: "Log\nIn",
-      welcomeBack: "Welcome back!",
-      enterLanguage: "Please select a language",
-      enterDetails: "Please enter\nyour details to\nlog in",
-      hiFriend: "Hi,\nfriend!",
-      registerData: "Register with your personal data",
-      forgotPassword: "Forgot your password?",
-    },
-    es: {
-      accountActivated: "Tu cuenta ha sido activada exitosamente. ¡Ahora puedes iniciar sesión!",
-      invalidOrExpiredToken: "Token inválido o expirado. Por favor, intenta nuevamente.",
-      googleRegister: "Regístrate\ncon Google",
-      googleLogin: "Inicia sesión\ncon Google",
-      emailVerificationPending:
-        "Tu cuenta no ha sido verificada. Por favor revisa tu bandeja de entrada y spam! Activa el enlace enviado!",
-      accountCreated: "Cuenta creada exitosamente. Revisa tu correo para verificar tu cuenta.",
-      passwordsMismatch: "Las contraseñas no coinciden.",
-      invalidCredentials: "Credenciales inválidas.",
-      resendVerificationEmail: "Reenviar correo",
-      errorOccured: "Ocurrió un error. Por favor intenta nuevamente.",
-      createAccount: "Crear Cuenta",
-      username: "Usuario",
-      email: "Correo Electrónico",
-      password: "Contraseña",
-      confirmPassword: "Confirmar Contraseña",
-      signUp: "Registrarse",
-      logIn: "Iniciar Sesión",
-      welcomeBack: "¡Bienvenido de nuevo!",
-      enterLanguage: "Por favor, selecciona un idioma",
-      enterDetails: "Por favor, introduce tus datos para\niniciar sesión",
-      hiFriend: "¡Hola, amigo!",
-      registerData: "Regístrate con tus datos personales",
-      forgotPassword: "¿Olvidaste tu contraseña?",
-    },
-    pt: {
-      accountActivated: "Sua conta foi ativada com sucesso. Agora você pode fazer login!",
-      invalidOrExpiredToken: "Token inválido ou expirado. Por favor, tente novamente.",
-      googleRegister: "Regista-te\ncom Google",
-      googleLogin: "Inicia sessão\ncom Google",
-      emailVerificationPending:
-        "A sua conta ainda não foi verificada. Por favor verifique a caixa de entrada e o spam! Active o link enviado!",
-      accountCreated: "Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.",
-      passwordsMismatch: "As senhas não coincidem.",
-      invalidCredentials: "Credenciais inválidas.",
-      resendVerificationEmail: "Reenviar email",
-      errorOccured: "Ocorreu um erro. Por favor, tente novamente.",
-      createAccount: "Criar Conta",
-      username: "Utilizador",
-      email: "Email",
-      password: "Palavra-passe",
-      confirmPassword: "Confirmar Palavra-passe",
-      signUp: "Registar-se",
-      logIn: "Iniciar Sessão",
-      welcomeBack: "Bem-vindo de volta!",
-      enterLanguage: "Por favor, escolha um idioma",
-      enterDetails: "Por favor, insira os seus dados para\niniciar sessão",
-      hiFriend: "Olá, amigo!",
-      registerData: "Registe-se com os seus dados pessoais",
-      forgotPassword: "Esqueceu-se da sua palavra-passe?",
-    },
-  }), []);
-
+  const [loading, setLoading] = useState(false);
+  const toasterShown = useRef(false);
   const t = translations[language];
+  const { resendCooldown, secondsLeft, startCooldown } = useCooldown();
+  const [showPopup, setShowPopup] = useState(false); // Controla la visibilidad del popup
+  const [popupMessage, setPopupMessage] = useState(""); // Contiene el mensaje del popup
+  const [formData, setFormData] = useState({username: "", email: "", password: "", confirmPassword: ""});
+  const navigate = useNavigate();
 
+
+/**********************************************************************************************************************************
+************************************** CONFIGURA EL IDIOMA SI NO ESTA DEFINIDO EN LOCAL STORAGE ***********************************
+**********************************************************************************************************************************/
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const status = urlParams.get("status");
-    const userLanguage = urlParams.get("language") || "en";
-  
-    // Verificar si ya se mostró el toaster en esta sesión
-    const hasToastShown = sessionStorage.getItem("toastShown");
-  
-    if (!hasToastShown && (status === "success" || status === "error")) {
-      setLanguage(userLanguage);
-  
-      if (status === "success") {
-        toast.info(translations[userLanguage]?.accountActivated || translations.en.accountActivated, {
-          autoClose: 10000,
-          position: "bottom-center",
-        });
-      } else if (status === "error") {
-        toast.error(translations[userLanguage]?.invalidOrExpiredToken || translations.en.invalidOrExpiredToken, {
-          autoClose: 10000,
-          position: "bottom-center",
-        });
-      }
-  
-      // Marcar como mostrado en sessionStorage
-      sessionStorage.setItem("toastShown", "true");
-  
-      // Limpiar los parámetros de la URL
-      setTimeout(() => {
-        navigate("/auth", { replace: true });
-      }, 100); // Pequeño retraso para evitar conflictos.
-    }
-  }, [location.search, translations, navigate]);
-  
-  
-  
+    // Verificar si ya existe un idioma en localStorage
+    const storedLanguage = localStorage.getItem("language");
 
+    if (!storedLanguage) {
+      // Si no existe, establece el idioma predeterminado (inglés)
+      localStorage.setItem("language", "en");
+      console.log("No language found in localStorage. Setting default to 'en'.");
+      setLanguage("en"); // Actualiza el estado del componente al idioma predeterminado
+    } else {
+      // Si existe un idioma, sincroniza el estado con el valor en localStorage
+      setLanguage(storedLanguage);
+      console.log("Language found in localStorage:", storedLanguage);
+    }
+  }, []);
+
+/**********************************************************************************************************************************
+************************* MANEJA TOKENS Y DATOS QUE LLEGAN DESDE LA URL + GUARDA ESTES DATOS EN LOCAL STORAGE *********************
+**********************************************************************************************************************************/
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    const userId = params.get("user_id");
+    const userLanguage = params.get("language"); // Obtener el idioma desde los parámetros
+
+    if (accessToken && refreshToken && userId && userLanguage) {
+      localStorage.setItem("access", accessToken);
+      localStorage.setItem("refresh", refreshToken);
+      localStorage.setItem("user_id", userId);
+      localStorage.setItem("language", userLanguage); // Almacenar el idioma en localStorage
+      console.log("Language received from backend:", userLanguage);
+      localStorage.setItem("show_toaster", "true");
+
+      window.history.replaceState({}, document.title, "/auth");
+    } else {
+      const storedAccessToken = localStorage.getItem("access");
+      const storedRefreshToken = localStorage.getItem("refresh");
+
+      if (!storedAccessToken || !storedRefreshToken) {
+        navigate("/auth");
+      }
+    }
+    setLoading(false);
+  }, [navigate]);
+
+/**********************************************************************************************************************************
+******************************* MUESTRA MENSAGES EXITOSOS CUANDO EL BACKEND ACTIVA SHOW TOASTER ***********************************
+**********************************************************************************************************************************/
+  useEffect(() => {
+    const userLanguage = localStorage.getItem("language") || "en";
+
+    // Agrega un log para confirmar el idioma del toaster
+    console.log("Toaster language:", userLanguage);
+
+    if (!toasterShown.current && localStorage.getItem("show_toaster") === "true") {
+      toasterShown.current = true; // Marca el toaster como mostrado
+      console.log("Displaying toaster...");
+
+      setTimeout(() => {
+        toast.success(
+          translations[userLanguage]?.accountCreatedSuccess || t.accountCreatedSuccess,
+          { autoClose: 10000 }
+        );
+        localStorage.removeItem("show_toaster");
+        console.log("Toaster displayed and flag removed");
+      }, 1000);
+    }
+  }, [t]);
+
+/**********************************************************************************************************************************
+******************************* ESCUCHA CAMBIOS EN LOCAL STORE PARA POSSIBLES SINCRONIZACIONES ************************************
+**********************************************************************************************************************************/
+  useEffect(() => {
+    const handleStorageChange = () => {
+      console.log("Storage changed:", localStorage.getItem("show_toaster"));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+/**********************************************************************************************************************************
+*************************** MUESTRA MENSAGES BASADOS EN LA URL + LIMPIA URL DESPUES DE MOSTRAR EL MENSAGE *************************
+**********************************************************************************************************************************/
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get("status");
+    const messageKey = urlParams.get("message");
+    const userLanguage = localStorage.getItem("language") || "en";
+
+    if (messageKey) {
+        const message = translations[userLanguage]?.[messageKey] || "An unknown error occurred.";
+        
+        if (status === "success") {
+            toast.success(message);
+        } else if (status === "error") {
+            toast.error(message);
+        }
+        
+        // Limpia la URL eliminando los parámetros después de mostrar el mensaje
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}, []);
+
+
+/**********************************************************************************************************************************
+**************************************************** MANEJO DEL SLIDER ************************************************************
+**********************************************************************************************************************************/
+  const handleRegisterClick = () => setIsActive(true);
+  const handleLoginClick = () => setIsActive(false);
+
+/**********************************************************************************************************************************
+************************************************* ACTUALIZACION DE LENGUAGE *******************************************************
+**********************************************************************************************************************************/
+  const handleLanguageChange = (lang) => {
+    setLanguage(lang); // Actualiza el estado del componente
+    localStorage.setItem("language", lang); // Actualiza el idioma en localStorage
+    console.log(`Language updated to: ${lang} and saved to localStorage.`);
+  };
+
+/**********************************************************************************************************************************
+****************************************************** SIGNUP NORMAL **************************************************************
+**********************************************************************************************************************************/
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleLanguageChange = (lang) => {
-    setLanguage(lang);
-  };
-
-  const handleRegisterClick = () => setIsActive(true);
-
-  const handleLoginClick = () => setIsActive(false);
-
+/**********************************************************************************************************************************
+************************************************* MANEJO DEL TOGGLE SWITCH ********************************************************
+**********************************************************************************************************************************/
   const handleToggleChange = () => setIsPartner(!isPartner);
 
-
-  /********************************************************************************************************************************
-  ******************************************************** SIGN UP ****************************************************************
-  ********************************************************************************************************************************/
-  const signup = async () => {
-    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
-      toast.error(t.errorOccured);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast.error(t.passwordsMismatch);
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/register/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept-Language": language, // Pasar el idioma seleccionado
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          language, // Asegúrate de que este valor se envíe
-        }),
-      });
-
-      if (response.ok) {
-        toast.success(t.accountCreated, { autoClose: 10000 }); // Duración ajustada a 10 segundos
-        setIsActive(false);
-      } else {
-        const errorData = await response.json();
-        // Mostrar mensajes específicos de errores
-        if (errorData.errors) {
-          Object.entries(errorData.errors).forEach(([field, messages]) => {
-            messages.forEach((msg) => toast.error(msg));
-          });
-        } else {
-          toast.error(t.errorOccured);
-        }
-      }
-    } catch (error) {
-      console.error("Registration error", error);
-      toast.error(t.errorOccured);
-    }
+/**********************************************************************************************************************************
+*********************************************** REENVIO DE EMAIL CONFIRMACION *****************************************************
+**********************************************************************************************************************************/
+  const handleResendVerification = () => {
+    resendVerificationEmail(formData.username, startCooldown, resendCooldown);
   };
 
-  /**********************************************************************************************************************************
-  ******************************************* COOLDOWN DEL BUTTON DE REENVIAR EMAIL *************************************************
-  **********************************************************************************************************************************/
-  // Estado inicial para manejar cooldown
-  const [resendCooldown, setResendCooldown] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(0);
-  const [showPopup, setShowPopup] = useState(false); // Controla la visibilidad del popup
-  const [popupMessage, setPopupMessage] = useState(""); // Contiene el mensaje del popup
-
-  // Función para manejar cooldown
-  const startCooldown = (duration) => {
-    setResendCooldown(true); // Activar cooldown
-    setSecondsLeft(duration); // Configurar duración inicial del temporizador
-
-    const interval = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval); // Detener el temporizador
-          setResendCooldown(false); // Desactivar cooldown
-          return 0; // Reiniciar segundos restantes
-        }
-        return prev - 1; // Decrementar contador
-      });
-    }, 1000);
+/**********************************************************************************************************************************
+****************************************************** LOGIN NORMAL ***************************************************************
+**********************************************************************************************************************************/
+  const handleLogin = () => {
+    loginNormal(formData, setPopupMessage, setShowPopup, navigate, language, API_BASE_URL);
   };
 
-  /**********************************************************************************************************************************
-  *********************************************** REENVIO DE EMAIL CONFIRMACION *****************************************************
-  **********************************************************************************************************************************/
-  const resendVerificationEmail = async (username) => {
-    if (!username) {
-      console.warn("El username no puede estar vacío.");
-      toast.error("El username no puede estar vacío.");
-      return; // Detén la ejecución si el username es nulo o vacío
-    }
-
-    if (resendCooldown) {
-      console.warn("Intento bloqueado: cooldown activo.");
-      return; // Bloquear nuevas solicitudes si el cooldown está activo
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/resend-verification/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username }),
-      });
-
-      if (response.ok) {
-        toast.success("Email de verificação reenviado com sucesso.");
-        startCooldown(60); // Activar cooldown por 60 segundos
-      } else if (response.status === 429) {
-        toast.error("Demasiados intentos. Por favor, espera un momento.");
-      } else {
-        const data = await response.json();
-        toast.error(data.error || "Error al reenviar el correo. Por favor, inténtalo de nuevo.");
-      }
-    } catch (error) {
-      console.error("Error al reenviar el correo:", error);
-      toast.error("Ocurrió un error. Inténtalo nuevamente.");
-    }
-  };
-
-  /**********************************************************************************************************************************
-  ********************************************************** LOGIN ******************************************************************
-  **********************************************************************************************************************************/
-  const login = async () => {
-    console.log("Datos enviados para login:", formData);
-  
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: formData.username, password: formData.password }),
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        console.log("Login exitoso:", data);
-  
-        // Guardar tokens en localStorage
-        localStorage.setItem("access", data.access);
-        localStorage.setItem("refresh", data.refresh);
-  
-        // Guardar el idioma del usuario en localStorage desde la base de datos
-        if (data.language) {
-          localStorage.setItem("language", data.language);
-          console.log("Idioma guardado en localStorage:", data.language);
-        } else {
-          // Si no hay un idioma en la base de datos, guardar inglés por defecto
-          localStorage.setItem("language", "en");
-          console.warn("Idioma no especificado, configurado a inglés por defecto.");
-        }
-  
-        // Guardar el user_id si está disponible
-        if (data.user_id) {
-          localStorage.setItem("user_id", data.user_id);
-        }
-  
-        // Redirigir al home
-        navigate("/home");
-      } else if (response.status === 403) {
-        console.error("Usuario inactivo:", data);
-  
-        const userLanguage = data.language || "en"; // Usar idioma si está disponible o inglés por defecto
-  
-        setPopupMessage(
-          translations[userLanguage]?.emailVerificationPending ||
-            "Sua conta não foi verificada! Por favor, verifique seu email."
-        );
-        setShowPopup(true);
-      } else {
-        console.error("Credenciales inválidas:", data);
-  
-        // Mostrar error basado en idioma seleccionado
-        toast.error(data.error || translations[language]?.invalidCredentials || "Credenciais inválidas.");
-      }
-    } catch (error) {
-      console.error("Error en el login:", error);
-  
-      // Mostrar error genérico basado en idioma seleccionado
-      toast.error(translations[language]?.errorOccured || "Ocorreu um erro.");
-    }
-  };
-
-
-
-
-  /**********************************************************************************************************************************
-  *************************************************** BOTAO GOOGLE REUTILIZAVEL *****************************************************
-  **********************************************************************************************************************************/
+/**********************************************************************************************************************************
+*************************************************** BOTAO GOOGLE REUTILIZAVEL *****************************************************
+**********************************************************************************************************************************/
   // Componente reutilizable para los botones de Google
   const GoogleAuthButton = ({ mode, onClick, translations }) => {
     return (
@@ -351,7 +194,7 @@ const LoginRegister = () => {
         <span className="google-login-text">
           {mode === "signup"
             // Texto para registro
-            ? translations.googleRegister
+            ? translations.googleSignup
             // Texto para login
             : translations.googleLogin}
         </span>
@@ -359,25 +202,33 @@ const LoginRegister = () => {
     );
   };
 
-  /**********************************************************************************************************************************
-  *************************************************** REGISTRO CON GOOGLE ***********************************************************
-  **********************************************************************************************************************************/
-  const googleRegister = () => {
-    const googleRegisterUrl = "https://127.0.0.1:8000/auth/oauth2/login/google/";
-    window.location.href = googleRegisterUrl;
-  };
+/**********************************************************************************************************************************
+*************************************************** REGISTRO CON GOOGLE ***********************************************************
+**********************************************************************************************************************************/
+const googleSignup = () => {
+  const apiUrl = process.env.REACT_APP_API_URL; // Asegúrate de que esta variable esté configurada en el .env del frontend
+  console.log("REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
+  const googleSignupUrl = `${apiUrl}/auth/oauth2/signup/google/`;
+  console.log("Google Signup URL:", googleSignupUrl);
+  console.log("Redirigiendo a backend para Google Signup:", googleSignupUrl);
+  window.location.href = googleSignupUrl; // Redirige al backend
+};
 
-  /**********************************************************************************************************************************
-  ***************************************************** LOGIN CON GOOGLE ************************************************************
-  **********************************************************************************************************************************/
+/**********************************************************************************************************************************
+***************************************************** LOGIN CON GOOGLE ************************************************************
+**********************************************************************************************************************************/
   const googleLogin = () => {
-    const googleLoginUrl = "https://127.0.0.1:8000/auth/oauth2/login/google/";
+    const googleLoginUrl = `${API_BASE_URL}/auth/oauth2/login/google/`;
     window.location.href = googleLoginUrl;
   };
 
-  /**********************************************************************************************************************************
-  *********************************************************** HTML ******************************************************************
-  **********************************************************************************************************************************/
+/**********************************************************************************************************************************
+*********************************************************** HTML ******************************************************************
+**********************************************************************************************************************************/
+  if (loading) {
+    return <div className="spinner">Cargando...</div>;
+  }
+
   return (
     <div className="signup-body">
       <div className={`signup-container ${isActive ? "signup-active" : ""}`} id="container">
@@ -436,8 +287,13 @@ const LoginRegister = () => {
                   {isPartner ? "Staff" : "User"}
                 </span>
               </div>
-              <button id="signUpButton" onClick={signup}>{t.signUp}</button>
-              <GoogleAuthButton mode="signup" onClick={googleRegister} translations={t} />
+              <button
+                id="signUpButton"
+                onClick={() => signupNormal(formData, setIsActive, language, t, API_BASE_URL)}
+              >
+                {t.signUp}
+              </button>
+              <GoogleAuthButton mode="signup" onClick={googleSignup} translations={t} />
             </div>
           </div>
         </div>
@@ -460,7 +316,7 @@ const LoginRegister = () => {
               value={formData.password}
               onChange={handleInputChange}
             />
-            <button id="logInButton" onClick={login}>{t.logIn}</button>
+            <button id="logInButton" onClick={handleLogin}>{t.logIn}</button>
             <GoogleAuthButton mode="login" onClick={googleLogin} translations={t} />
             <button
               onClick={() => toast.info("Función no implementada.")}
@@ -489,8 +345,7 @@ const LoginRegister = () => {
                   <p id="popupMessage">{popupMessage}</p>
                   <div className="button-container">
                     <button
-                      id={resendCooldown ? "button-disabled" : "button-enabled"} // Atributo id dinámico
-                      onClick={() => resendVerificationEmail(formData.username)} // Usa el username en lugar del email
+                      onClick={handleResendVerification} // Reemplaza aquí
                       disabled={resendCooldown}
                       style={{
                         padding: "10px 20px",
@@ -501,9 +356,7 @@ const LoginRegister = () => {
                         cursor: resendCooldown ? "not-allowed" : "pointer",
                       }}
                     >
-                      {resendCooldown
-                        ? `Reenviar email (${secondsLeft}s)` // Mostrar temporizador si está activo
-                        : t.resendVerificationEmail}
+                      {resendCooldown ? `Reenviar email (${secondsLeft}s)` : t.resendVerificationEmail}
                     </button>
                   </div>
                 </div>
