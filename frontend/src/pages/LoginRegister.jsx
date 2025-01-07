@@ -26,6 +26,29 @@ const LoginRegister = () => {
 
 
 /**********************************************************************************************************************************
+*************************** MUESTRA MENSAGES BASADOS EN LA URL + LIMPIA URL DESPUES DE MOSTRAR EL MENSAGE *************************
+**********************************************************************************************************************************/
+useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const status = urlParams.get("status");
+  const messageKey = urlParams.get("message");
+  const userLanguage = localStorage.getItem("language") || "en";
+
+  if (messageKey) {
+    const message = translations[userLanguage]?.[messageKey] || "An unknown error occurred.";
+
+    if (status === "success") {
+      toast.success(message);
+    } else if (status === "error") {
+      toast.error(message);
+    }
+
+    // Limpia la URL eliminando los parámetros después de mostrar el mensaje
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}, []);
+
+/**********************************************************************************************************************************
 ************************************** CONFIGURA EL IDIOMA SI NO ESTA DEFINIDO EN LOCAL STORAGE ***********************************
 **********************************************************************************************************************************/
   useEffect(() => {
