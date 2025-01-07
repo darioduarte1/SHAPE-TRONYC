@@ -4,6 +4,7 @@
 
 const translations = {
     en: {
+      emailAlreadyRegistered: "This email is already registered in the system. Please proceed to login with your credentials.",
       accountCreatedSuccess: "User successfully created! You can now use the Login with Google button to access your account.",
       accountActivated: "Your account has been successfully activated. You can now log in!",
       invalidOrExpiredToken: "Invalid or expired token. Please try again.",
@@ -30,6 +31,7 @@ const translations = {
       forgotPassword: "Forgot your password?",
     },
     es: {
+      emailAlreadyRegistered: "Este correo ya está registrado en el sistema. Por favor, proceda a iniciar sesión con sus credenciales.",
       accountCreatedSuccess: "Usuario creado con éxito. ¡Ahora puedes usar el botón de Iniciar sesión con Google para acceder a tu cuenta!",
       accountActivated: "Tu cuenta ha sido activada exitosamente. ¡Ahora puedes iniciar sesión!",
       invalidOrExpiredToken: "Token inválido o expirado. Por favor, intenta nuevamente.",
@@ -56,6 +58,7 @@ const translations = {
       forgotPassword: "¿Olvidaste tu contraseña?",
     },
     pt: {
+      emailAlreadyRegistered: "Este email já está registrado em sistema. Por favor, proceda ao login com as suas credenciais.",
       accountCreatedSuccess: "Usuário criado com êxito! Já podes usar o botão de Iniciar secção com Google para entrares na tua conta",
       accountActivated: "Sua conta foi ativada com sucesso. Agora você pode fazer login!",
       invalidOrExpiredToken: "Token inválido ou expirado. Por favor, tente novamente.",

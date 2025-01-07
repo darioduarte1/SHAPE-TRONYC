@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Security from "./pages/Security";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
+import OAuthCallback from "./components/signup/signupGoogle/OAuthCallback";
 
 function App() {
     const futureFlags = {
@@ -25,6 +26,7 @@ function App() {
                     <Route path="/logout" element={<Logout />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/security" element={<Security />} />
+                    <Route path="/auth/oauth2/callback" element={<OAuthCallback />} />
                 </Routes>
                 <ToastContainer
                     position="bottom-left"

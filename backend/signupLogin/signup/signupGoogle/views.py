@@ -9,6 +9,8 @@ from django.utils.crypto import get_random_string
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model  # Importación necesaria
 from backend.profiles.models import UserProfile
+from backend.signupLogin.utils import get_tokens_for_user
+from rest_framework.response import Response
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +19,7 @@ class GoogleSignupView(APIView):
 
     def get(self, request):
         google_auth_url = "https://accounts.google.com/o/oauth2/auth"
+        language = request.GET.get("language", "en")  # Capturar el lenguaje de la URL
         params = {
             "client_id": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,
             "redirect_uri": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI,
@@ -24,24 +27,28 @@ class GoogleSignupView(APIView):
             "scope": "email profile",
             "access_type": "offline",
             "prompt": "consent",
+            "state": language,  # Pasar el lenguaje como parte del estado
         }
         query_string = "&".join([f"{key}={value}" for key, value in params.items()])
-        logger.info(f"Redirigiendo a Google OAuth con la URL: {google_auth_url}?{query_string}")
+        logger.info(f"URL generada para Google: {google_auth_url}?{query_string}")
         return redirect(f"{google_auth_url}?{query_string}")
-
-# Google Callback View
-User = get_user_model()
 
 class GoogleSignupCallbackView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
+        # Obtener el código de autorización de la URL
         authorization_code = request.GET.get('code', None)
         if not authorization_code:
             logger.error("Código de autorización no proporcionado")
             return Response({"error": "Authorization code not provided"}, status=400)
 
-        # Exchange authorization code for tokens
+        logger.debug(f"Código recibido en el callback: {authorization_code}")
+
+        # Intercambiar el código por tokens
         token_url = "https://oauth2.googleapis.com/token"
         token_data = {
             "code": authorization_code,
@@ -50,39 +57,64 @@ class GoogleSignupCallbackView(APIView):
             "redirect_uri": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI,
             "grant_type": "authorization_code",
         }
+
         token_response = requests.post(token_url, data=token_data)
+
         if token_response.status_code != 200:
             logger.error("Error al intercambiar el token con Google")
             return Response({"error": "Failed to fetch access token from Google"}, status=500)
 
         tokens = token_response.json()
 
-        # Fetch user info using the access token
+        # Obtener información del usuario con el access_token
         user_info_url = "https://www.googleapis.com/oauth2/v1/userinfo"
         user_info_response = requests.get(
-            user_info_url, headers={"Authorization": f"Bearer {tokens['access_token']}"}
+            user_info_url,
+            headers={"Authorization": f"Bearer {tokens['access_token']}"}
         )
+
         if user_info_response.status_code != 200:
             logger.error("Error al obtener información del usuario desde Google")
             return Response({"error": "Failed to fetch user info from Google"}, status=500)
 
         user_info = user_info_response.json()
 
-        # Get or create a user
+        # Recuperar el estado enviado desde el frontend (idioma)
+        language = request.GET.get('state', 'en')  # Idioma predeterminado es 'en'
+
+        # Verificar si el usuario ya existe
+        if User.objects.filter(email=user_info["email"]).exists():
+            logger.info(f"Intento de registro con un email ya registrado: {user_info['email']}")
+            
+            # Redirigir al frontend con mensaje de error
+            redirect_url = f"{settings.FRONTEND_HOME_URL}/auth"
+            query_params = f"?status=error&message=emailAlreadyRegistered&language={language}"
+            return redirect(f"{redirect_url}{query_params}")
+
+        # Crear un nuevo usuario si no existe
         user, created = User.objects.get_or_create(
             email=user_info["email"],
             defaults={
                 "first_name": user_info.get("given_name", ""),
                 "last_name": user_info.get("family_name", ""),
+                "language": language,  # Asignar el idioma
             },
         )
 
-        # Generate JWT tokens
-        from .utils import get_tokens_for_user
+        # Generar tokens JWT
         jwt_tokens = get_tokens_for_user(user)
 
-        # Redirect to frontend with tokens
-        frontend_url = settings.FRONTEND_HOME_URL  # Set this in your Django settings
-        redirect_url = f"{frontend_url}?access_token={jwt_tokens['access']}&refresh_token={jwt_tokens['refresh']}"
-        logger.info(f"Redirigiendo al frontend con la URL: {redirect_url}")
-        return redirect(redirect_url)
+        # Preparar la respuesta JSON
+        response_data = {
+            "access_token": jwt_tokens["access"],
+            "refresh_token": jwt_tokens["refresh"],
+            "user_id": user.id,
+            "language": user.language,
+        }
+
+        logger.info("Enviando datos al frontend vía JSON.")
+
+        # Redirigir al frontend con los datos de autenticación
+        redirect_url = f"{settings.FRONTEND_HOME_URL}/auth/oauth2/callback"
+        query_params = "&".join([f"{key}={value}" for key, value in response_data.items()])
+        return redirect(f"{redirect_url}?{query_params}")
