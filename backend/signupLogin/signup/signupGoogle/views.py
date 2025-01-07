@@ -37,8 +37,8 @@ class GoogleSignupCallbackView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        from django.contrib.auth import get_user_model  # Mueve esta importación al inicio de la función
-        User = get_user_model()  # Obtén el modelo de usuario
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
 
         # Obtener el código de autorización de la URL
         authorization_code = request.GET.get('code', None)
@@ -58,7 +58,6 @@ class GoogleSignupCallbackView(APIView):
             "grant_type": "authorization_code",
         }
 
-        logger.debug(f"Enviando solicitud de tokens a Google con los datos: {token_data}")
         token_response = requests.post(token_url, data=token_data)
 
         if token_response.status_code != 200:
@@ -83,7 +82,16 @@ class GoogleSignupCallbackView(APIView):
         # Recuperar el estado enviado desde el frontend (idioma)
         language = request.GET.get('state', 'en')  # Idioma predeterminado es 'en'
 
-        # Crear o actualizar al usuario en la base de datos
+        # Verificar si el usuario ya existe
+        if User.objects.filter(email=user_info["email"]).exists():
+            logger.info(f"Intento de registro con un email ya registrado: {user_info['email']}")
+            
+            # Redirigir al frontend con mensaje de error
+            redirect_url = f"{settings.FRONTEND_HOME_URL}/auth"
+            query_params = f"?status=error&message=emailAlreadyRegistered&language={language}"
+            return redirect(f"{redirect_url}{query_params}")
+
+        # Crear un nuevo usuario si no existe
         user, created = User.objects.get_or_create(
             email=user_info["email"],
             defaults={
@@ -92,11 +100,6 @@ class GoogleSignupCallbackView(APIView):
                 "language": language,  # Asignar el idioma
             },
         )
-
-        if not created:
-            # Actualizar el idioma si el usuario ya existe
-            user.language = language
-            user.save()
 
         # Generar tokens JWT
         jwt_tokens = get_tokens_for_user(user)
