@@ -44,35 +44,6 @@ const LoginRegister = () => {
     }
   }, []);
 
-/**********************************************************************************************************************************
-************************* MANEJA TOKENS Y DATOS QUE LLEGAN DESDE LA URL + GUARDA ESTES DATOS EN LOCAL STORAGE *********************
-**********************************************************************************************************************************/
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const accessToken = params.get("access_token");
-    const refreshToken = params.get("refresh_token");
-    const userId = params.get("user_id");
-    const userLanguage = params.get("language"); // Obtener el idioma desde los parámetros
-
-    if (accessToken && refreshToken && userId && userLanguage) {
-      localStorage.setItem("access", accessToken);
-      localStorage.setItem("refresh", refreshToken);
-      localStorage.setItem("user_id", userId);
-      localStorage.setItem("language", userLanguage); // Almacenar el idioma en localStorage
-      console.log("Language received from backend:", userLanguage);
-      localStorage.setItem("show_toaster", "true");
-
-      window.history.replaceState({}, document.title, "/auth");
-    } else {
-      const storedAccessToken = localStorage.getItem("access");
-      const storedRefreshToken = localStorage.getItem("refresh");
-
-      if (!storedAccessToken || !storedRefreshToken) {
-        navigate("/auth");
-      }
-    }
-    setLoading(false);
-  }, [navigate]);
 
 /**********************************************************************************************************************************
 ******************************* MUESTRA MENSAGES EXITOSOS CUANDO EL BACKEND ACTIVA SHOW TOASTER ***********************************
@@ -205,13 +176,10 @@ const LoginRegister = () => {
 /**********************************************************************************************************************************
 *************************************************** REGISTRO CON GOOGLE ***********************************************************
 **********************************************************************************************************************************/
-const googleSignup = () => {
-  const apiUrl = process.env.REACT_APP_API_URL; // Asegúrate de que esta variable esté configurada en el .env del frontend
-  console.log("REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
-  const googleSignupUrl = `${apiUrl}/auth/oauth2/signup/google/`;
-  console.log("Google Signup URL:", googleSignupUrl);
-  console.log("Redirigiendo a backend para Google Signup:", googleSignupUrl);
-  window.location.href = googleSignupUrl; // Redirige al backend
+const handleGoogleSignup = () => {
+  const googleSignupUrl = `${API_BASE_URL}/auth/oauth2/signup/google/`;
+  console.log("Redirigiendo a:", googleSignupUrl);
+  window.location.href = googleSignupUrl;
 };
 
 /**********************************************************************************************************************************
@@ -293,7 +261,7 @@ const googleSignup = () => {
               >
                 {t.signUp}
               </button>
-              <GoogleAuthButton mode="signup" onClick={googleSignup} translations={t} />
+              <GoogleAuthButton mode="signup" onClick={handleGoogleSignup} translations={t} />
             </div>
           </div>
         </div>
