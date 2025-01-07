@@ -177,9 +177,10 @@ const LoginRegister = () => {
 *************************************************** REGISTRO CON GOOGLE ***********************************************************
 **********************************************************************************************************************************/
 const handleGoogleSignup = () => {
-  const googleSignupUrl = `${API_BASE_URL}/auth/oauth2/signup/google/`;
+  const language = localStorage.getItem("language") || "en"; // Obtener el lenguaje desde localStorage
+  const googleSignupUrl = `${API_BASE_URL}/auth/oauth2/signup/google/?language=${language}`;
   console.log("Redirigiendo a:", googleSignupUrl);
-  window.location.href = googleSignupUrl;
+  window.location.href = googleSignupUrl; // Redirige al backend con el lenguaje
 };
 
 /**********************************************************************************************************************************

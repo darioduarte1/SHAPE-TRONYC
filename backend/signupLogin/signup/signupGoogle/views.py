@@ -19,6 +19,7 @@ class GoogleSignupView(APIView):
 
     def get(self, request):
         google_auth_url = "https://accounts.google.com/o/oauth2/auth"
+        language = request.GET.get("language", "en")  # Capturar el lenguaje de la URL
         params = {
             "client_id": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,
             "redirect_uri": settings.SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI,
@@ -26,18 +27,19 @@ class GoogleSignupView(APIView):
             "scope": "email profile",
             "access_type": "offline",
             "prompt": "consent",
+            "state": language,  # Pasar el lenguaje como parte del estado
         }
         query_string = "&".join([f"{key}={value}" for key, value in params.items()])
         logger.info(f"URL generada para Google: {google_auth_url}?{query_string}")
         return redirect(f"{google_auth_url}?{query_string}")
 
-# Google Callback View
-User = get_user_model()
-
 class GoogleSignupCallbackView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        from django.contrib.auth import get_user_model  # Mueve esta importación al inicio de la función
+        User = get_user_model()  # Obtén el modelo de usuario
+
         # Obtener el código de autorización de la URL
         authorization_code = request.GET.get('code', None)
         if not authorization_code:
@@ -59,10 +61,6 @@ class GoogleSignupCallbackView(APIView):
         logger.debug(f"Enviando solicitud de tokens a Google con los datos: {token_data}")
         token_response = requests.post(token_url, data=token_data)
 
-        # Log de la respuesta
-        logger.debug(f"Token response status: {token_response.status_code}")
-        logger.debug(f"Token response content: {token_response.text}")
-
         if token_response.status_code != 200:
             logger.error("Error al intercambiar el token con Google")
             return Response({"error": "Failed to fetch access token from Google"}, status=500)
@@ -76,29 +74,31 @@ class GoogleSignupCallbackView(APIView):
             headers={"Authorization": f"Bearer {tokens['access_token']}"}
         )
 
-        logger.debug(f"User info response status: {user_info_response.status_code}")
-        logger.debug(f"User info response content: {user_info_response.text}")
-
         if user_info_response.status_code != 200:
             logger.error("Error al obtener información del usuario desde Google")
             return Response({"error": "Failed to fetch user info from Google"}, status=500)
 
         user_info = user_info_response.json()
 
-        # Crear o actualizar al usuario en la base de datos
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
+        # Recuperar el estado enviado desde el frontend (idioma)
+        language = request.GET.get('state', 'en')  # Idioma predeterminado es 'en'
 
+        # Crear o actualizar al usuario en la base de datos
         user, created = User.objects.get_or_create(
             email=user_info["email"],
             defaults={
                 "first_name": user_info.get("given_name", ""),
                 "last_name": user_info.get("family_name", ""),
+                "language": language,  # Asignar el idioma
             },
         )
 
+        if not created:
+            # Actualizar el idioma si el usuario ya existe
+            user.language = language
+            user.save()
+
         # Generar tokens JWT
-        from backend.signupLogin.utils import get_tokens_for_user
         jwt_tokens = get_tokens_for_user(user)
 
         # Preparar la respuesta JSON
@@ -106,7 +106,7 @@ class GoogleSignupCallbackView(APIView):
             "access_token": jwt_tokens["access"],
             "refresh_token": jwt_tokens["refresh"],
             "user_id": user.id,
-            "language": user.language if hasattr(user, "language") else "en",
+            "language": user.language,
         }
 
         logger.info("Enviando datos al frontend vía JSON.")
