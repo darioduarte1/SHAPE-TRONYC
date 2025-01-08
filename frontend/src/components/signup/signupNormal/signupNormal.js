@@ -33,7 +33,7 @@ const signupNormal = async (formData, setIsActive, language, t, API_BASE_URL) =>
       const errorData = await response.json();
       // Mostrar mensajes específicos de errores
       if (errorData.errors) {
-        Object.entries(errorData.errors).forEach(([field, messages]) => {
+        Object.entries(errorData.errors).forEach(([messages]) => {
           messages.forEach((msg) => toast.error(msg));
         });
       } else {
