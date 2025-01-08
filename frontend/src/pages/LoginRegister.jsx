@@ -8,6 +8,7 @@ import signupNormal from "../components/signup/signupNormal/signupNormal";
 import useCooldown from "../components/signup/signupNormal/utils/cooldown"; // Timer de cooldown para o botao de reenviar email de verificação 
 import resendVerificationEmail from "../components/signup/signupNormal/utils/resendVerificationEmail"; // Función para reenviar email de verificação
 import loginNormal from "../components/login/loginNormal/loginNormal"; // Función para hacer login de forma normal
+import PropTypes from 'prop-types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -15,7 +16,7 @@ const LoginRegister = () => {
   const [isActive, setIsActive] = useState(false);
   const [isPartner, setIsPartner] = useState(false);
   const [language, setLanguage] = useState("en");
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const toasterShown = useRef(false);
   const t = translations[language];
   const { resendCooldown, secondsLeft, startCooldown } = useCooldown();
@@ -401,6 +402,15 @@ const handleGoogleSignup = () => {
       </div>
     </div>
   );
+};
+
+LoginRegister.propTypes = {
+  mode: PropTypes.string.isRequired, // mode debe ser un string
+  onClick: PropTypes.func.isRequired, // onClick debe ser una función
+  translations: PropTypes.shape({
+    googleSignup: PropTypes.string.isRequired, // translations.googleSignup es un string
+    googleLogin: PropTypes.string.isRequired,  // translations.googleLogin es un string
+  }).isRequired,
 };
 
 export default LoginRegister;

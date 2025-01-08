@@ -1,8 +1,5 @@
 import { toast } from "react-toastify";
 
-// Importar startCooldown del archivo cooldown.js
-import useCooldown from "./cooldown";
-
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 // Función para reenviar email de verificación
